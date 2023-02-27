@@ -84,8 +84,11 @@ void move(int percent, double inches) //using encoders
 
 
     //Turn off motors
+    stopDriving();
+}
+
+void stopDriving(){
     right_motor.Stop();
     left_motor.Stop();
 }
-
 
