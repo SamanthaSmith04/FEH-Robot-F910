@@ -31,14 +31,11 @@ AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //FUNCTION HEADERS
 void testCDS();
+void checkPoint1Code();
 
 
 int main() {
-    //ANY PRE-DRIVE SETUP STUFF
 
-    //WAIT FOR START LIGHT
-    while (cdsCell.Value() > CDS_START_THRESHOLD){}
-    //GO
 }
 
 /*
@@ -52,4 +49,13 @@ void testCDS(){
        LCD.Write(cdsCell.Value());
        Sleep(0.1);
    }
+}
+
+void checkPoint1Code(){
+    //ANY PRE-DRIVE SETUP STUFF
+
+    //WAIT FOR START LIGHT
+    while (cdsCell.Value() > CDS_START_THRESHOLD){}
+    //GO
+    //
 }
