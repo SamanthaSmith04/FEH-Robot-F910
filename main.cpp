@@ -23,8 +23,9 @@
 #define CIRCUM (2*3.1415*3)
 #define RIGHT_ENCODER_PORT FEHIO::P0_0
 #define LEFT_ENCODER_PORT FEHIO::P0_0
-#define RED_VALUE 1 //Arbitrary Red Value`
+#define RED_VALUE 1 //Arbitrary Red Value
 #define BLUE_VALUE 1 //Arbitrary Blue Value
+#define ROBOT_WIDTH 8.6
 
 //COMPONENTS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
@@ -125,7 +126,7 @@ Turn Right function
     the angle that the robot will move
 */
 void rotateLeft(int percent, double degrees){
-    int counts = 230;
+    int counts = (ROBOT_WIDTH/2 * degrees * 318)/ CIRCUM;
     double speedMultiplier = 0.9;
     int fullSpeedCounts = (counts * 0.90);
 
@@ -161,7 +162,7 @@ Turn Left function
     the angle that the robot will move
 */
 void rotateRight(int percent, double degrees){
-    int counts = 250;
+    int counts = (ROBOT_WIDTH/2 * degrees * 318)/ CIRCUM;
     double speedMultiplier = 0.9;
     int fullSpeedCounts = (counts * 0.90);
 
