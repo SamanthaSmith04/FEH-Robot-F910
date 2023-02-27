@@ -102,7 +102,7 @@ void move(int percent, double inches) //using encoders
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
 
 
     //Turn off motors
@@ -114,9 +114,19 @@ void stopDriving(){
     left_motor.Stop();
 }
 
-//Needs Testing
+/*
+Turn Right function
+@param percent
+    the speed that the robot should turn
+@param degrees
+    the angle that the robot will move
+*/
 void rotateLeft(int percent, double degrees){
     int counts = 230;
+    double speedMultiplier = 0.9;
+    int fullSpeedCounts = (counts * 0.90);
+
+    
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -129,6 +139,9 @@ void rotateLeft(int percent, double degrees){
 
     //While the average of the left and right encoder is less than counts,
     //keep running motors
+    while((right_encoder.Counts()<fullSpeedCounts));
+    right_motor.SetPercent(percent * speedMultiplier);
+    right_motor.SetPercent(percent * speedMultiplier * -1);
     while((right_encoder.Counts()<counts));
 
 
@@ -137,9 +150,19 @@ void rotateLeft(int percent, double degrees){
     left_motor.Stop();
 }
 
-//Needs Testing
+/*
+Turn Left function
+@param percent
+    the speed that the robot should turn
+@param degrees
+    the angle that the robot will move
+*/
 void rotateRight(int percent, double degrees){
     int counts = 250;
+    double speedMultiplier = 0.9;
+    int fullSpeedCounts = (counts * 0.90);
+
+
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -152,7 +175,10 @@ void rotateRight(int percent, double degrees){
 
     //While the average of the left and right encoder is less than counts,
     //keep running motors
-    while((left_encoder.Counts()<counts));
+    while((right_encoder.Counts()<fullSpeedCounts));
+    right_motor.SetPercent(percent * speedMultiplier * -1);
+    right_motor.SetPercent(percent * speedMultiplier);
+    while((right_encoder.Counts()<counts));
 
 
     //Turn off motors
