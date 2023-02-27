@@ -19,10 +19,12 @@
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P0_0
-#define BUMP_SWITCH_PORT FEHIO::P0_1
 #define CDS_START_THRESHOLD 0
-#define CDS_RED_VALUE
-#define CDS_BLUE_VALUE
+#define BUMP_SWITCH_PORT FEHIO::P0_1
+//Arbitrary Red Value
+#define RED 1
+
+
 
 //GLOBAL VARIABLES
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
