@@ -22,7 +22,7 @@
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 //Arbitrary Red Value
 #define RED 1
-
+#define CIRCUM (2*3.1415*3)
 
 
 //GLOBAL VARIABLES
