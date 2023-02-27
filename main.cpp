@@ -14,23 +14,25 @@
 #include <FEHUtility.h>
 
 //CONSTANTS
-#define LEFT_MOTOR_PORT FEHMotor::Motor0
+#define RIGHT_MOTOR_PORT FEHMotor::Motor0
 #define LEFT_MOTOR_PORT FEHMotor::Motor1
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P0_0
-#define CDS_START_THRESHOLD 0
+#define CDS_START_THRESHOLD 0 //ARBITRARY CDS VALUE
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 #define CIRCUM (2*3.1415*3)
+#define RIGHT_ENCODER_PORT FEHIO::P0_0
+#define LEFT_ENCODER_PORT FEHIO::P0_0
+#define RED 1 //Arbitrary Red Value
+#define BLUE 1 //Arbitrary Blue Value
 
-//Declarations for Encoders, Arbitrary Ports
-DigitalEncoder right_encoder(FEHIO::P0_0);
-DigitalEncoder left_encoder(FEHIO::P0_1);
-FEHMotor right_motor(FEHMotor::Motor0,9.0);
-FEHMotor left_motor(FEHMotor::Motor1,9.0);
+//COMPONENTS
+DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
+DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
+FEHMotor right_motor(RIGHT_MOTOR_PORT, 9.0);
+FEHMotor left_motor(LEFT_MOTOR_PORT, 9.0);
 
-//Arbitrary Red Value
-#define RED 1
 
 
 
@@ -126,7 +128,7 @@ void rotateLeft(int percent, double degrees){
     double speedMultiplier = 0.9;
     int fullSpeedCounts = (counts * 0.90);
 
-    
+
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
