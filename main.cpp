@@ -20,11 +20,20 @@
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P0_0
 #define BUMP_SWITCH_PORT FEHIO::P0_1
+//Arbitrary Red Value
+#define RED 1
+
 
 
 //GLOBAL VARIABLES
 
 
 int main() {
+AnalogInputPin cdsCell(CDS_SENSOR_PORT);
+
+//Doesn't do anything until light Starts
+while(cdsCell.Value() != RED){
+
+}
 
 }
