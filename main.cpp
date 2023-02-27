@@ -19,6 +19,7 @@
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P0_0
+#define CDS_START_THRESHOLD 0
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 //Arbitrary Red Value
 #define RED 1
@@ -26,14 +27,29 @@
 
 
 //GLOBAL VARIABLES
+AnalogInputPin cdsCell(CDS_SENSOR_PORT);
+
+//FUNCTION HEADERS
+void testCDS();
 
 
 int main() {
-AnalogInputPin cdsCell(CDS_SENSOR_PORT);
+    //ANY PRE-DRIVE SETUP STUFF
 
-//Doesn't do anything until light Starts
-while(cdsCell.Value() != RED){
-
+    //WAIT FOR START LIGHT
+    while (cdsCell.Value() > CDS_START_THRESHOLD){}
+    //GO
 }
 
+/*
+Used for testing the CDS cell values and prints the value to the screen
+USED FOR TESTING PURPOSES ONLY, NOT FOR CHECKING COLORS WHILE ROBOT IS RUNNING
+*/
+void testCDS(){
+    AnalogInputPin cdsCell(FEHIO::P0_0);
+    while (1 == 1){
+       LCD.Clear();
+       LCD.Write(cdsCell.Value());
+       Sleep(0.1);
+   }
 }
