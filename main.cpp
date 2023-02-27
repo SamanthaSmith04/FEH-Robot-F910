@@ -32,9 +32,9 @@ DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
 FEHMotor right_motor(RIGHT_MOTOR_PORT, 9.0);
 FEHMotor left_motor(LEFT_MOTOR_PORT, 9.0);
+AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //GLOBAL VARIABLES
-AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //FUNCTION HEADERS
 void testCDS();
@@ -116,6 +116,42 @@ void moveForward(int percent, double inches) //using encoders
     stopDriving();
 }
 
+/*
+Drive function
+@param percent
+    the speed that the robot should move backward
+@param inches
+    the distance that the robot will move
+*/
+void moveBackward(int percent, double inches) //using encoders
+{
+    int counts = (int) ((inches/CIRCUM)*318);
+    int fullSpeedCounts = (counts * 0.90);
+    //Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    //Set both motors to desired percent
+    right_motor.SetPercent(-1*percent);
+    left_motor.SetPercent(-1*percent);
+
+    //While the average of the left and right encoder is less than 90% of the distance,
+    //keep running motors
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
+
+    //drop speed to 75% of max speed
+    right_motor.SetPercent(-1*percent * 0.9);
+    left_motor.SetPercent(-1*percent * 0.9);
+
+    //While the average of the left and right encoder is less than the full distance,
+    //keep running motors
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
+
+
+    //Turn off motors
+    stopDriving();
+}
+
 void stopDriving(){
     right_motor.Stop();
     left_motor.Stop();
@@ -191,41 +227,5 @@ void rotateRight(int percent, double degrees){
     //Turn off motors
     right_motor.Stop();
     left_motor.Stop();
-}
-
-/*
-Drive function
-@param percent
-    the speed that the robot should move backward
-@param inches
-    the distance that the robot will move
-*/
-void moveBackward(int percent, double inches) //using encoders
-{
-    int counts = (int) ((inches/CIRCUM)*318);
-    int fullSpeedCounts = (counts * 0.90);
-    //Reset encoder counts
-    right_encoder.ResetCounts();
-    left_encoder.ResetCounts();
-
-    //Set both motors to desired percent
-    right_motor.SetPercent(-1*percent);
-    left_motor.SetPercent(-1*percent);
-
-    //While the average of the left and right encoder is less than 90% of the distance,
-    //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
-
-    //drop speed to 75% of max speed
-    right_motor.SetPercent(-1*percent * 0.9);
-    left_motor.SetPercent(-1*percent * 0.9);
-
-    //While the average of the left and right encoder is less than the full distance,
-    //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
-
-
-    //Turn off motors
-    stopDriving();
 }
 
