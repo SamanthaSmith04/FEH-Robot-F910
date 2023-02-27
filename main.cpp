@@ -39,14 +39,11 @@ AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //FUNCTION HEADERS
 void testCDS();
+void checkPoint1Code();
 
 
 int main() {
-    //ANY PRE-DRIVE SETUP STUFF
 
-    //WAIT FOR START LIGHT
-    while (cdsCell.Value() > CDS_START_THRESHOLD){}
-    //GO
 }
 
 /*
@@ -62,6 +59,14 @@ void testCDS(){
    }
 }
 
+void checkPoint1Code(){
+    //ANY PRE-DRIVE SETUP STUFF
+
+    //WAIT FOR START LIGHT
+    while (cdsCell.Value() > CDS_START_THRESHOLD){}
+    //GO
+    //
+}
 //-1 for backwards, 1 for forwards
 void move(int percent, double inches) //using encoders
 {
