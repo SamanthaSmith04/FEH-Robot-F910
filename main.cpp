@@ -106,6 +106,56 @@ void move(int percent, double inches) //using encoders
 
 
     //Turn off motors
+    stopDriving();
+}
+
+void stopDriving(){
+    right_motor.Stop();
+    left_motor.Stop();
+}
+
+//Needs Testing
+void rotateLeft(int percent, double degrees){
+    int counts = 230;
+    //Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+
+    //Set both motors to desired percent
+    right_motor.SetPercent(percent);
+    left_motor.SetPercent(-1*percent);
+
+
+    //While the average of the left and right encoder is less than counts,
+    //keep running motors
+    while((right_encoder.Counts()<counts));
+
+
+    //Turn off motors
+    right_motor.Stop();
+    left_motor.Stop();
+}
+
+//Needs Testing
+void rotateRight(int percent, double degrees){
+    int counts = 250;
+    //Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+
+    //Set both motors to desired percent
+    right_motor.SetPercent(-1*percent);
+    left_motor.SetPercent(percent);
+
+
+    //While the average of the left and right encoder is less than counts,
+    //keep running motors
+    while((left_encoder.Counts()<counts));
+
+
+    //Turn off motors
     right_motor.Stop();
     left_motor.Stop();
 }
