@@ -69,11 +69,14 @@ Drives up the ramp, touches the kiosk, and drives back down the ramp
 */
 void checkpoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
-
+    int motor_percent = 40;
+    double first_movement = 41.17;
+    
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
     //GO
     //
+    moveForward(motor_percent,first_movement);
 }
 
 /*
