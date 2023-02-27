@@ -59,7 +59,11 @@ void testCDS(){
    }
 }
 
-void checkPoint1Code(){
+/*
+The main drive code for checkpoint 1
+Drives up the ramp, touches the kiosk, and drives back down the ramp
+*/
+void checkpoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
 
     //WAIT FOR START LIGHT
@@ -67,25 +71,38 @@ void checkPoint1Code(){
     //GO
     //
 }
-//-1 for backwards, 1 for forwards
+
+/*
+Drive function
+@param percent
+    the speed that the robot should move forward
+    Negative for backward, Positive for forward
+@param inches
+    the distance that the robot will move
+*/
 void move(int percent, double inches) //using encoders
 {
-
-
     int counts = (int) ((inches/CIRCUM)*318);
+    int fullSpeedCounts = (counts * 0.90);
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
-
 
     //Set both motors to desired percent
     right_motor.SetPercent(percent);
     left_motor.SetPercent(percent);
 
-
-    //While the average of the left and right encoder is less than counts,
+    //While the average of the left and right encoder is less than 90% of the distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
+
+    //drop speed to 75% of max speed
+    right_motor.SetPercent(percent * 0.9);
+    left_motor.SetPercent(percent * 0.9);
+
+    //While the average of the left and right encoder is less than the full distance,
+    //keep running motors
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
 
 
     //Turn off motors
