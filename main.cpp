@@ -78,11 +78,10 @@ void checkpoint1Code(){
 Drive function
 @param percent
     the speed that the robot should move forward
-    Negative for backward, Positive for forward
 @param inches
     the distance that the robot will move
 */
-void move(int percent, double inches) //using encoders
+void moveForward(int percent, double inches) //using encoders
 {
     int counts = (int) ((inches/CIRCUM)*318);
     int fullSpeedCounts = (counts * 0.90);
@@ -188,4 +187,39 @@ void rotateRight(int percent, double degrees){
     left_motor.Stop();
 }
 
+/*
+Drive function
+@param percent
+    the speed that the robot should move backward
+@param inches
+    the distance that the robot will move
+*/
+void moveBackward(int percent, double inches) //using encoders
+{
+    int counts = (int) ((inches/CIRCUM)*318);
+    int fullSpeedCounts = (counts * 0.90);
+    //Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    //Set both motors to desired percent
+    right_motor.SetPercent(-1*percent);
+    left_motor.SetPercent(-1*percent);
+
+    //While the average of the left and right encoder is less than 90% of the distance,
+    //keep running motors
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
+
+    //drop speed to 75% of max speed
+    right_motor.SetPercent(-1*percent * 0.9);
+    left_motor.SetPercent(-1*percent * 0.9);
+
+    //While the average of the left and right encoder is less than the full distance,
+    //keep running motors
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
+
+
+    //Turn off motors
+    stopDriving();
+}
 
