@@ -27,6 +27,7 @@
 #define BLUE_VALUE 1 //Arbitrary Blue Value
 #define ROBOT_WIDTH 8.6
 
+
 //COMPONENTS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
@@ -48,7 +49,7 @@ void rotateRight(int, double);
 
 
 int main() {
-
+    checkPoint1Code();
 }
 
 /*
@@ -72,13 +73,34 @@ void checkpoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
     double first_movement = 41.17;
+    double first_turn = 0;
+    double second_movement = 0;
+    double second_turn = 0;
+    double third_movement = 0;
     
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
     //GO
     //
     moveForward(motor_percent,first_movement);
+    //turn slightly towards ramp
+    rotateLeft(motor_percent, first_turn);
+    //drive up ramp
+    moveForward(motor_percent, second_movement);
+    //turn towards boarding pass buttons
+    rotateLeft(motor_percent, second_turn);
+    //drive towards boarding pass buttons
+    moveForward(motor_percent, third_movement);
+
+    //GO BACK
+    //back up to ramp
+    moveBackward(motor_percent, third_movement);
+    //turn to ramp
+    rotateRight(motor_percent, second_turn);
+    //back up down ramp
+    moveBackward(motor_percent, second_movement);
 }
+    
 
 /*
 Drive function
