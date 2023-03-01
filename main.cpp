@@ -14,19 +14,19 @@
 #include <FEHUtility.h>
 
 //CONSTANTS
-#define RIGHT_MOTOR_PORT FEHMotor::Motor0
-#define LEFT_MOTOR_PORT FEHMotor::Motor1
+#define RIGHT_MOTOR_PORT FEHMotor::Motor1 //
+#define LEFT_MOTOR_PORT FEHMotor::Motor0 //
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
-#define CDS_SENSOR_PORT FEHIO::P0_0
+#define CDS_SENSOR_PORT FEHIO::P1_0
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 #define CIRCUM (2*3.1415*3)
-#define RIGHT_ENCODER_PORT FEHIO::P0_0
-#define LEFT_ENCODER_PORT FEHIO::P0_0
-#define RED_VALUE 1 //Arbitrary Red Value
+#define RIGHT_ENCODER_PORT FEHIO::P0_1 //
+#define LEFT_ENCODER_PORT FEHIO::P0_0 //
+#define RED_VALUE 0.1 //Arbitrary Red Value
 #define BLUE_VALUE 1 //Arbitrary Blue Value
 #define ROBOT_WIDTH 8.6
-
+#define PI 3.14159
 
 //COMPONENTS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
@@ -36,15 +36,16 @@ FEHMotor left_motor(LEFT_MOTOR_PORT, 9.0);
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //GLOBAL VARIABLES
+int x, y;
 
 //FUNCTION HEADERS
 void testCDS();
 void checkPoint1Code();
 void moveForward(int, double);
 void moveBackward(int, double);
-void checkpoint1Code();
 void stopDriving();
 void rotateLeft(int, double);
+void driveTest();
 void rotateRight(int, double);
 
 
@@ -53,11 +54,78 @@ int main() {
 }
 
 /*
+DRIVING TEST CODE
+*/
+void driveTest(){
+    int percent;
+    LCD.SetBackgroundColor(BLACK);
+    LCD.SetFontColor(RED);
+    LCD.DrawRectangle(10, 10, 50, 50);
+    LCD.WriteAt("25%", 11, 11);
+    LCD.DrawRectangle(70, 10, 50, 50);
+    LCD.WriteAt("50%", 71, 11);
+    LCD.DrawRectangle(10, 70, 50, 50);
+    LCD.WriteAt("75%", 11, 71);
+
+    LCD.DrawRectangle(100, 100, 50, 50);
+    LCD.WriteAt("CDS", 101, 101);
+
+    while (!LCD.Touch(&x, &y)) {
+        if (x >= 10 && x <= 60 && y >= 10 && y <= 60){
+            percent = 25;
+        }
+        else if (x >= 70 && x <= 120 && y >= 10 && y <= 60){
+            percent = 50;
+        }
+        else if (x >= 10 && x <= 60 && y >= 70 && y <= 120){
+            percent = 75;
+        }
+        else if (x >= 100 && x <= 150 && y >= 100 && y <= 150){
+            testCDS();
+        }
+    }
+    //forward
+    LCD.Write("Going forward 6in");
+    moveForward(percent, 6);
+    LCD.Clear();
+    LCD.Write("Stopping");
+    Sleep(0.5);
+
+    //backward
+    LCD.Write("Going backward 6in");
+    moveBackward(percent, 6);
+    LCD.Clear();
+    LCD.Write("Stopping");
+    Sleep(0.5);
+
+    //turn right
+    LCD.Write("Turning right 90 degrees");
+    rotateRight(percent, 90);
+    LCD.Clear();
+    LCD.Write("Stopping");
+    Sleep(0.5);
+
+    //turn right
+    LCD.Write("Turning right 90 degrees");
+    rotateRight(percent, 90);
+    LCD.Clear();
+    LCD.Write("Stopping");
+    Sleep(0.5);
+
+    //turn left
+    LCD.Write("Turning right 90 degrees");
+    rotateLeft(percent, 90);
+    LCD.Clear();
+    LCD.Write("Stopping");
+    Sleep(0.5);
+}
+
+
+/*
 Used for testing the CDS cell values and prints the value to the screen
 USED FOR TESTING PURPOSES ONLY, NOT FOR CHECKING COLORS WHILE ROBOT IS RUNNING
 */
 void testCDS(){
-    AnalogInputPin cdsCell(FEHIO::P0_0);
     while (1 == 1){
        LCD.Clear();
        LCD.Write(cdsCell.Value());
@@ -69,12 +137,12 @@ void testCDS(){
 The main drive code for checkpoint 1
 Drives up the ramp, touches the kiosk, and drives back down the ramp
 */
-void checkpoint1Code(){
+void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
-    double first_movement = 6;
+    double first_movement = 3;
     double first_turn = 45;
-    double second_movement = 25;
+    double second_movement = 30;
     double second_turn = 30;
     double third_movement = 30;
     
@@ -123,7 +191,7 @@ void moveForward(int percent, double inches) //using encoders
 
     //While the average of the left and right encoder is less than 90% of the distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     //drop speed to 75% of max speed
     right_motor.SetPercent(percent * 0.9);
@@ -131,7 +199,7 @@ void moveForward(int percent, double inches) //using encoders
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2);
 
 
     //Turn off motors
@@ -159,7 +227,7 @@ void moveBackward(int percent, double inches) //using encoders
 
     //While the average of the left and right encoder is less than 90% of the distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts);
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     //drop speed to 75% of max speed
     right_motor.SetPercent(-1*percent * 0.9);
@@ -167,7 +235,7 @@ void moveBackward(int percent, double inches) //using encoders
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
-    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts){}
+    while((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2){}
 
 
     //Turn off motors
@@ -187,7 +255,7 @@ Turn Right function
     the angle that the robot will move
 */
 void rotateLeft(int percent, double degrees){
-    int counts = (ROBOT_WIDTH/2 * degrees * 318)/ CIRCUM;
+    int counts = (ROBOT_WIDTH/2 * degrees * (PI/180) * 318)/ CIRCUM;
     double speedMultiplier = 0.9;
     int fullSpeedCounts = (counts * 0.90);
 
@@ -204,10 +272,10 @@ void rotateLeft(int percent, double degrees){
 
     //While the average of the left and right encoder is less than counts,
     //keep running motors
-    while((right_encoder.Counts()<fullSpeedCounts));
+    while((right_encoder.Counts()<fullSpeedCounts * 2));
     right_motor.SetPercent(percent * speedMultiplier);
-    right_motor.SetPercent(percent * speedMultiplier * -1);
-    while((right_encoder.Counts()<counts));
+    left_motor.SetPercent(percent * speedMultiplier * -1);
+    while((right_encoder.Counts()<counts * 2));
 
 
     //Turn off motors
@@ -223,7 +291,7 @@ Turn Left function
     the angle that the robot will move
 */
 void rotateRight(int percent, double degrees){
-    int counts = (ROBOT_WIDTH/2 * degrees * 318)/ CIRCUM;
+    int counts = (ROBOT_WIDTH/2 * degrees * (PI/180) * 318)/ CIRCUM;
     double speedMultiplier = 0.9;
     int fullSpeedCounts = (counts * 0.90);
 
@@ -240,10 +308,10 @@ void rotateRight(int percent, double degrees){
 
     //While the average of the left and right encoder is less than counts,
     //keep running motors
-    while((right_encoder.Counts()<fullSpeedCounts));
+    while((right_encoder.Counts()<fullSpeedCounts * 2));
     right_motor.SetPercent(percent * speedMultiplier * -1);
-    right_motor.SetPercent(percent * speedMultiplier);
-    while((right_encoder.Counts()<counts));
+    left_motor.SetPercent(percent * speedMultiplier);
+    while((right_encoder.Counts()<counts * 2));
 
 
     //Turn off motors
