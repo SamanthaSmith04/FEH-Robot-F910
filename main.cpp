@@ -6,6 +6,22 @@
 *                             Robot Code
 ===========================================================================*/
 
+/* =========================================================================
+*                                PORTS
+*   MOTORS
+*       LEFT DRIVE    - MOTOR 0
+*       RIGHT DRIVE   - MOTOR 1
+*       ARM MOTOR     - 
+*   SERVOS
+*       DROPPER SERVO - 
+*   ENCODERS
+*       LEFT ENCODER  - P0_0
+*       RIGHT ENCODER - P0_1
+*   OTHER COMPONENTS
+*       CDS CELL      - P1_0
+*       BUMP SWITCH   - 
+===========================================================================*/
+
 //IMPORTS
 #include <FEHLCD.h>
 #include <FEHMotor.h>
@@ -162,10 +178,13 @@ void checkPoint1Code(){
 
     Sleep(0.5);
     //GO BACK
-    //back up to ramp
-    rotateRight(motor_percent, 35);
-    moveBackward(motor_percent, 10);
-    rotateLeft(motor_percent, 6);
+
+    rotateRight(motor_percent, 45);
+
+    moveBackward(motor_percent, 15);
+
+    rotateLeft(motor_percent, 25);
+
     moveBackward(motor_percent, 30);
 }
     
@@ -180,7 +199,7 @@ Drive function
 void moveForward(int percent, double inches) //using encoders
 {
     int counts = (int) ((inches/CIRCUM)*318);
-    int fullSpeedCounts = (counts * 0.90);
+    int fullSpeedCounts = (counts * 0.80);
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -194,8 +213,8 @@ void moveForward(int percent, double inches) //using encoders
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     //drop speed to 75% of max speed
-    right_motor.SetPercent(percent * 0.9);
-    left_motor.SetPercent(percent * 0.9);
+    right_motor.SetPercent(percent * 0.7);
+    left_motor.SetPercent(percent * 0.7);
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
@@ -216,7 +235,7 @@ Drive function
 void moveBackward(int percent, double inches) //using encoders
 {
     int counts = (int) ((inches/CIRCUM)*318);
-    int fullSpeedCounts = (counts * 0.90);
+    int fullSpeedCounts = (counts * 0.80);
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -230,8 +249,8 @@ void moveBackward(int percent, double inches) //using encoders
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     //drop speed to 75% of max speed
-    right_motor.SetPercent(-1*percent * 0.9);
-    left_motor.SetPercent(-1*percent * 0.9);
+    right_motor.SetPercent(-1*percent * 0.7);
+    left_motor.SetPercent(-1*percent * 0.7);
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
@@ -256,8 +275,8 @@ Turn Right function
 */
 void rotateLeft(int percent, double degrees){
     int counts = (ROBOT_WIDTH/2 * degrees * (PI/180) * 318)/ CIRCUM;
-    double speedMultiplier = 0.9;
-    int fullSpeedCounts = (counts * 0.90);
+    double speedMultiplier = 0.7;
+    int fullSpeedCounts = (counts * 0.80);
 
 
     //Reset encoder counts
@@ -292,8 +311,8 @@ Turn Left function
 */
 void rotateRight(int percent, double degrees){
     int counts = (ROBOT_WIDTH/2 * degrees * (PI/180) * 318)/ CIRCUM;
-    double speedMultiplier = 0.9;
-    int fullSpeedCounts = (counts * 0.90);
+    double speedMultiplier = 0.7;
+    int fullSpeedCounts = (counts * 0.80);
 
 
     //Reset encoder counts
