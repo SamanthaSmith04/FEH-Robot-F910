@@ -141,10 +141,10 @@ void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
     double first_movement = 3;
-    double first_turn = 45;
+    double first_turn = 33;
     double second_movement = 30;
-    double second_turn = 30;
-    double third_movement = 30;
+    double second_turn = 45;
+    double third_movement = 26;
     
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
@@ -160,13 +160,13 @@ void checkPoint1Code(){
     //drive towards boarding pass buttons
     moveForward(motor_percent, third_movement);
 
+    Sleep(0.5);
     //GO BACK
     //back up to ramp
-    moveBackward(motor_percent, third_movement);
-    //turn to ramp
-    rotateRight(motor_percent, second_turn);
-    //back up down ramp
-    moveBackward(motor_percent, second_movement);
+    rotateRight(motor_percent, 35);
+    moveBackward(motor_percent, 10);
+    rotateLeft(motor_percent, 6);
+    moveBackward(motor_percent, 30);
 }
     
 
