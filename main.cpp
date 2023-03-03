@@ -126,7 +126,7 @@ void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
     double first_movement = 4;
-    double first_turn = 25;
+    double first_turn = 30;
     double second_movement = 34;
     double third_movement = 10;
     double fourth_movement = 20;
