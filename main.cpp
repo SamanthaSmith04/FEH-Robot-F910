@@ -30,8 +30,8 @@
 #include <FEHUtility.h>
 
 //CONSTANTS
-#define RIGHT_MOTOR_PORT FEHMotor::Motor1 //
-#define LEFT_MOTOR_PORT FEHMotor::Motor0 //
+#define RIGHT_MOTOR_PORT FEHMotor::Motor1 
+#define LEFT_MOTOR_PORT FEHMotor::Motor0
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P1_0
@@ -39,9 +39,9 @@
 #define CIRCUM (2*3.1415*3)
 #define RIGHT_ENCODER_PORT FEHIO::P0_1 //
 #define LEFT_ENCODER_PORT FEHIO::P0_0 //
-#define RED_VALUE 0.1 //Arbitrary Red Value
+#define RED_VALUE 0.18
 #define BLUE_VALUE 1 //Arbitrary Blue Value
-#define ROBOT_WIDTH 8.6
+#define ROBOT_WIDTH 7.5
 #define PI 3.14159
 
 //COMPONENTS
@@ -66,6 +66,7 @@ void rotateRight(int, double);
 
 
 int main() {
+    //testCDS();
     checkPoint1Code();
 }
 
@@ -157,35 +158,54 @@ void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
     double first_movement = 3;
-    double first_turn = 33;
-    double second_movement = 30;
-    double second_turn = 45;
-    double third_movement = 26;
+    double first_turn = 31;
+    double second_movement = 33;
+    double second_turn = 50;
+    double third_movement = 20;
     
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
     //GO
     //
     moveForward(motor_percent,first_movement);
+    Sleep(0.5);
     //turn slightly towards ramp
     rotateLeft(motor_percent, first_turn);
+    Sleep(0.5);
+
     //drive up ramp
     moveForward(motor_percent, second_movement);
+    Sleep(0.5);
+
     //turn towards boarding pass buttons
     rotateLeft(motor_percent, second_turn);
+    Sleep(0.5);
+
+    moveForward(motor_percent, 13);
+
+    Sleep(0.5);
+
+    rotateRight(motor_percent, 24);
+    Sleep(0.5);
     //drive towards boarding pass buttons
     moveForward(motor_percent, third_movement);
 
     Sleep(0.5);
     //GO BACK
 
-    rotateRight(motor_percent, 45);
+    rotateRight(motor_percent, 35);
+    Sleep(0.5);
 
-    moveBackward(motor_percent, 15);
 
-    rotateLeft(motor_percent, 25);
+    moveBackward(motor_percent, 13);
+    Sleep(0.5);
 
-    moveBackward(motor_percent, 30);
+
+    rotateLeft(motor_percent, 12);
+    Sleep(0.5);
+
+
+    moveBackward(motor_percent, 20);
 }
     
 
@@ -199,7 +219,7 @@ Drive function
 void moveForward(int percent, double inches) //using encoders
 {
     int counts = (int) ((inches/CIRCUM)*318);
-    int fullSpeedCounts = (counts * 0.80);
+    int fullSpeedCounts = (counts * 0.90);
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -213,8 +233,8 @@ void moveForward(int percent, double inches) //using encoders
     while((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     //drop speed to 75% of max speed
-    right_motor.SetPercent(percent * 0.7);
-    left_motor.SetPercent(percent * 0.7);
+    right_motor.SetPercent(percent * 0.8);
+    left_motor.SetPercent(percent * 0.8);
 
     //While the average of the left and right encoder is less than the full distance,
     //keep running motors
@@ -235,7 +255,7 @@ Drive function
 void moveBackward(int percent, double inches) //using encoders
 {
     int counts = (int) ((inches/CIRCUM)*318);
-    int fullSpeedCounts = (counts * 0.80);
+    int fullSpeedCounts = (counts * 0.85);
     //Reset encoder counts
     right_encoder.ResetCounts();
     left_encoder.ResetCounts();
@@ -261,6 +281,9 @@ void moveBackward(int percent, double inches) //using encoders
     stopDriving();
 }
 
+/*
+Stop function
+*/
 void stopDriving(){
     right_motor.Stop();
     left_motor.Stop();
