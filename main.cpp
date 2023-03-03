@@ -41,7 +41,7 @@
 #define LEFT_ENCODER_PORT FEHIO::P0_0 //
 #define RED_VALUE 0.18
 #define BLUE_VALUE 1 //Arbitrary Blue Value
-#define ROBOT_WIDTH 7.5
+#define ROBOT_WIDTH 7.75
 #define PI 3.14159
 
 //COMPONENTS
@@ -68,39 +68,15 @@ void rotateRight(int, double);
 int main() {
     //testCDS();
     checkPoint1Code();
+    //driveTest();
 }
 
 /*
 DRIVING TEST CODE
 */
 void driveTest(){
-    int percent;
+    int percent = 25;
     LCD.SetBackgroundColor(BLACK);
-    LCD.SetFontColor(RED);
-    LCD.DrawRectangle(10, 10, 50, 50);
-    LCD.WriteAt("25%", 11, 11);
-    LCD.DrawRectangle(70, 10, 50, 50);
-    LCD.WriteAt("50%", 71, 11);
-    LCD.DrawRectangle(10, 70, 50, 50);
-    LCD.WriteAt("75%", 11, 71);
-
-    LCD.DrawRectangle(100, 100, 50, 50);
-    LCD.WriteAt("CDS", 101, 101);
-
-    while (!LCD.Touch(&x, &y)) {
-        if (x >= 10 && x <= 60 && y >= 10 && y <= 60){
-            percent = 25;
-        }
-        else if (x >= 70 && x <= 120 && y >= 10 && y <= 60){
-            percent = 50;
-        }
-        else if (x >= 10 && x <= 60 && y >= 70 && y <= 120){
-            percent = 75;
-        }
-        else if (x >= 100 && x <= 150 && y >= 100 && y <= 150){
-            testCDS();
-        }
-    }
     //forward
     LCD.Write("Going forward 6in");
     moveForward(percent, 6);
@@ -111,13 +87,6 @@ void driveTest(){
     //backward
     LCD.Write("Going backward 6in");
     moveBackward(percent, 6);
-    LCD.Clear();
-    LCD.Write("Stopping");
-    Sleep(0.5);
-
-    //turn right
-    LCD.Write("Turning right 90 degrees");
-    rotateRight(percent, 90);
     LCD.Clear();
     LCD.Write("Stopping");
     Sleep(0.5);
@@ -152,60 +121,65 @@ void testCDS(){
 
 /*
 The main drive code for checkpoint 1
-Drives up the ramp, touches the kiosk, and drives back down the ramp
-*/
+Drives up the ramp, touches the kiosk, and drives back down the ramp*/
 void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
-    double first_movement = 3;
-    double first_turn = 31;
-    double second_movement = 33;
-    double second_turn = 50;
-    double third_movement = 20;
+    double first_movement = 4;
+    double first_turn = 25;
+    double second_movement = 34;
+    double third_movement = 10;
+    double fourth_movement = 20;
+
+    //backing up
+    double backup_turn = 30;
+    double backup1 = 25;
+    double backup_turn_2 = 60;
+    double backup2 = 20;
+
     
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
     //GO
     //
     moveForward(motor_percent,first_movement);
-    Sleep(0.5);
-    //turn slightly towards ramp
+
+    //turn to ramp
     rotateLeft(motor_percent, first_turn);
-    Sleep(0.5);
+    Sleep(0.3);
 
-    //drive up ramp
+    //go up ramp
     moveForward(motor_percent, second_movement);
-    Sleep(0.5);
+    Sleep(0.3);
 
-    //turn towards boarding pass buttons
-    rotateLeft(motor_percent, second_turn);
-    Sleep(0.5);
+    //turn 90
+    rotateLeft(motor_percent, 90);
+    Sleep(0.3);
 
-    moveForward(motor_percent, 13);
-
-    Sleep(0.5);
-
-    rotateRight(motor_percent, 24);
-    Sleep(0.5);
-    //drive towards boarding pass buttons
+    //go forward
     moveForward(motor_percent, third_movement);
+    Sleep(0.3);
 
-    Sleep(0.5);
-    //GO BACK
+    //turn 90
+    rotateRight(motor_percent, 90);
+    Sleep(0.3);
 
-    rotateRight(motor_percent, 35);
-    Sleep(0.5);
+    //move straight
+    moveForward(motor_percent, fourth_movement);
+    Sleep(0.3);
 
+    //BACK
+    rotateRight(motor_percent, backup_turn);
+    Sleep(0.3);
 
-    moveBackward(motor_percent, 13);
-    Sleep(0.5);
+    moveBackward(motor_percent, backup1);
+    Sleep(0.3);
 
+    rotateLeft(motor_percent, backup_turn_2);
+    Sleep(0.3);
 
-    rotateLeft(motor_percent, 12);
-    Sleep(0.5);
+    moveBackward(motor_percent, backup2);
 
-
-    moveBackward(motor_percent, 20);
 }
     
 
