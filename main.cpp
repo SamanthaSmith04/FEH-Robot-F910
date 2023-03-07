@@ -9,17 +9,20 @@
 /* =========================================================================
 *                                PORTS
 *   MOTORS
-*       LEFT DRIVE    - MOTOR 0
-*       RIGHT DRIVE   - MOTOR 1
-*       ARM MOTOR     - 
+*       LEFT DRIVE       - MOTOR 0
+*       RIGHT DRIVE      - MOTOR 1
+*       ARM MOTOR        -  
 *   SERVOS
-*       DROPPER SERVO - 
+*       DROPPER SERVO    - 
 *   ENCODERS
-*       LEFT ENCODER  - P0_0
-*       RIGHT ENCODER - P0_1
+*       LEFT ENCODER     - P0_0
+*       RIGHT ENCODER    - P0_1
 *   OTHER COMPONENTS
-*       CDS CELL      - P1_0
-*       BUMP SWITCH   - 
+*       CDS CELL (COLOR) - P1_0
+*       CDS CELL RIGHT   - P1_1
+*       CDS CELL MIDDLE  - P1_2
+*       CDS CELL LEFT    - P1_3
+*       BUMP SWITCH      - 
 ===========================================================================*/
 
 //IMPORTS
@@ -34,14 +37,17 @@
 #define LEFT_MOTOR_PORT FEHMotor::Motor0
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
-#define CDS_SENSOR_PORT FEHIO::P1_0
+#define CDS_SENSOR_PORT FEHIO::P1_0 //CDS for COLOR
+#define CDS_R_PORT FEHIO::P1_1
+#define CDS_M_PORT FEHIO::P1_2
+#define CDS_L_PORT FEHIO::P1_3
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 #define CIRCUM (2*3.1415*3)
-#define RIGHT_ENCODER_PORT FEHIO::P0_1 //
-#define LEFT_ENCODER_PORT FEHIO::P0_0 //
+#define RIGHT_ENCODER_PORT FEHIO::P0_1
+#define LEFT_ENCODER_PORT FEHIO::P0_0
 #define RED_VALUE 0.18
 #define BLUE_VALUE 1 //Arbitrary Blue Value
-#define ROBOT_WIDTH 7.75
+#define ROBOT_WIDTH 7.625
 #define PI 3.14159
 
 //COMPONENTS
@@ -57,17 +63,20 @@ int x, y;
 //FUNCTION HEADERS
 void testCDS();
 void checkPoint1Code();
+void checkPoint2Code();
 void moveForward(int, double);
 void moveBackward(int, double);
+void moveBackward(int);
 void stopDriving();
 void rotateLeft(int, double);
 void driveTest();
 void rotateRight(int, double);
+void startToRampTopR(int);
 
 
 int main() {
     //testCDS();
-    checkPoint1Code();
+    checkPoint2Code();
     //driveTest();
 }
 
@@ -181,7 +190,103 @@ void checkPoint1Code(){
     moveBackward(motor_percent, backup2);
 
 }
+
+
+/*
+The main drive code for checkpoint 1
+Drives up the ramp, touches the kiosk, and drives back down the ramp*/ 
+void checkPoint2Code(){
+    int CDSValue = 3.3;
+    int motor_percent = 40;
+    /*unused distances
+    int moveForward1 = 0; // move towards wall - A
+    int turn1 = 0; //turn towards ramp - TA
+    int moveForward2 = 0; // move up ramp - B*/
+
+    int turn2 = 90; //turn towards left side wall - TB
+    int moveForward3 = 20; // move towards left side wall - C
+    int turn3 = 90; // turn towards light sensor - TC
+    int moveForward4 = 14; //move towards light - D //may be eliminated
+    int backUp5 = 0; // back up from light - E
+    int turn5 = 0; // turn to right wall - TE
+    int moveForwardBlue = 0; //move distance needed for blue button - F
+    int turnBlue = 0; //turn to blue button - TF
+    int moveForwardBlue2 = 0; // move to blue button - H
+    int moveForwardRed = 0; //move distance needed for red button - G
+    int turnRed = 0; // turn towards red button - TG
+    int moveForwardRed2 = 0; // move to red button - I
+
+    //move from the start to the top of the right ramp, end facing towards top of field
+    startToRampTopR(motor_percent);
+    Sleep(0.1);
     
+    rotateLeft(motor_percent, turn2);
+    Sleep(0.5);
+
+    moveBackward(motor_percent);
+    Sleep(1.0);
+    stopDriving();
+    Sleep(0.1);
+
+    moveForward(motor_percent, moveForward3);
+    Sleep(0.1);
+
+    rotateRight(motor_percent, turn3);
+    Sleep(0.1);
+
+    moveForward(motor_percent, moveForward4); //LIGHT IS CHECKED HERE
+    Sleep(1.0);
+
+    //display color to screen
+    if (CDSValue < RED_VALUE){
+        LCD.SetBackgroundColor(RED);
+    }
+    else if (CDSValue < BLUE_VALUE){
+        LCD.SetBackgroundColor(BLUE);
+    }
+    else {
+        LCD.SetBackgroundColor(YELLOW);
+    }
+    LCD.Clear();
+
+    moveBackward(motor_percent, backUp5);
+
+    rotateRight(motor_percent, turn5); //robot now decides which button to go to
+
+    if (CDSValue < RED_VALUE){
+        moveForward(motor_percent, moveForwardBlue);
+        rotateLeft(motor_percent, turnBlue);
+        moveForward(motor_percent, moveForwardBlue2);
+    }
+    else if (CDSValue < BLUE_VALUE){
+        moveForward(motor_percent, moveForwardRed);
+        rotateLeft(motor_percent, turnRed);
+        moveForward(motor_percent, moveForwardRed2);
+    }
+    
+
+    
+}
+
+void startToRampTopR(int motor_percent){
+    double first_movement = 3;
+    double first_turn = 33;
+    double second_movement = 34;
+
+    //WAIT FOR START LIGHT
+    while (cdsCell.Value() > RED_VALUE){}
+    //GO
+    //
+    moveForward(motor_percent,first_movement);
+
+    //turn to ramp
+    rotateLeft(motor_percent, first_turn);
+    Sleep(0.15);
+
+    //go up ramp
+    moveForward(motor_percent, second_movement);
+    Sleep(0.15);
+}
 
 /*
 Drive function
@@ -253,6 +358,16 @@ void moveBackward(int percent, double inches) //using encoders
 
     //Turn off motors
     stopDriving();
+}
+
+/*
+Overloaded Drive backward function
+Only backs up, no stopping
+*/
+void moveBackward(int percent){
+    right_motor.SetPercent(-1*percent);
+    left_motor.SetPercent(-1*percent);
+    
 }
 
 /*
