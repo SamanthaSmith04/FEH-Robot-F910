@@ -46,7 +46,7 @@
 #define RIGHT_ENCODER_PORT FEHIO::P0_1
 #define LEFT_ENCODER_PORT FEHIO::P0_0
 #define RED_VALUE 0.18
-#define BLUE_VALUE 0.6 //Arbitrary Blue Value
+#define BLUE_VALUE 0.80 //Arbitrary Blue Value
 #define ROBOT_WIDTH 7.625
 #define PI 3.14159
 
@@ -206,8 +206,7 @@ void checkPoint1Code(){
 The main drive code for checkpoint 1
 Drives up the ramp, touches the kiosk, and drives back down the ramp*/ 
 void checkPoint2Code(){
-    int CDSValue = 3.3;
-    int motor_percent = 40;
+    int motor_percent = 35;
     /*unused distances
     int moveForward1 = 0; // move towards wall - A
     int turn1 = 0; //turn towards ramp - TA
@@ -216,13 +215,13 @@ void checkPoint2Code(){
     int turn2 = 90; //turn towards left side wall - TB
     int moveForward3 = 19; // move towards left side wall - C
     int turn3 = 90; // turn towards light sensor - TC
-    int moveForward4 = 14; //move towards light - D //may be eliminated
+    int moveForward4 = 16; //move towards light - D //may be eliminated
     int backUp5 = 10; // back up from light - E
     int turn5 = 90; // turn to right wall - TE
-    int moveForwardBlue = 15; //move distance needed for blue button - F
+    int moveForwardBlue = 6; //move distance needed for blue button - F
     int turnBlue = 90; //turn to blue button - TF
-    int moveForwardBlue2 = 6; // move to blue button - H
-    int moveForwardRed = 10.5; //move distance needed for red button - G
+    int moveForwardBlue2 = 15; // move to blue button - H
+    int moveForwardRed = 9; //move distance needed for red button - G
     int turnRed = 90; // turn towards red button - TG
     int moveForwardRed2 = 15; // move to red button - I
 
@@ -233,8 +232,6 @@ void checkPoint2Code(){
     rotateLeft(motor_percent, turn2);
     Sleep(0.5);
 
-    rotateLeft(motor_percent, 10);
-    Sleep(0.1);
     moveBackward(motor_percent);
     Sleep(1.0);
     stopDriving();
@@ -249,28 +246,26 @@ void checkPoint2Code(){
 
 
     moveForward(motor_percent, moveForward4); //LIGHT IS CHECKED HERE
-    while (cdsCell.Value() >= BLUE_VALUE){
-        rotateLeft(20, 10);
-        Sleep(0.1);
-        rotateRight(20, 10);
-        Sleep(0.1);
-    }
-    CDSValue = cdsCell.Value();
+
+    
+    int side;
+    double CDSValue = cdsCell.Value();
 
     //display color to screen
     if (CDSValue <= RED_VALUE){
         LCD.SetBackgroundColor(RED);
-        CDSValue = 1;
+        side = 1;
     }
     else if (CDSValue <= BLUE_VALUE){
         LCD.SetBackgroundColor(BLUE);
-        CDSValue = 0;
+        side = 0;
     }
     else {
-        LCD.SetBackgroundColor(YELLOW);
-        CDSValue = 0;
+        LCD.SetBackgroundColor(BLUEVIOLET);
+        side = 0; //default to blue
     }
     LCD.Clear();
+    LCD.Write(CDSValue);
     Sleep(0.2);
 
     moveBackward(motor_percent, backUp5);
@@ -279,7 +274,7 @@ void checkPoint2Code(){
     rotateRight(motor_percent, turn5);     
     Sleep(0.2);
     
-    moveBackward(motor_percent);
+    moveBackward(motor_percent+ 15);
     Sleep(1.0);
     stopDriving();
     Sleep(0.2);
@@ -288,7 +283,7 @@ void checkPoint2Code(){
     
     //robot now decides which button to go to
 
-    if (CDSValue == 0){
+    if (side == 0){
         moveForward(motor_percent, moveForwardBlue);
         Sleep(0.2);
         rotateLeft(motor_percent, turnBlue);
@@ -296,7 +291,7 @@ void checkPoint2Code(){
         moveForward(motor_percent, moveForwardBlue2);
         Sleep(0.2);
     }
-    else if (CDSValue == 1){
+    else if (side == 1){
         moveForward(motor_percent, moveForwardRed);
         Sleep(0.2);
         rotateLeft(motor_percent, turnRed);
@@ -314,7 +309,7 @@ void checkPoint2Code(){
 
 void startToRampTopR(int motor_percent){
     double first_movement = 3;
-    double first_turn = 35; //33
+    double first_turn = 25; //33
     double second_movement = 34;
 
     //WAIT FOR START LIGHT
