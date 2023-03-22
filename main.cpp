@@ -9,20 +9,22 @@
 /* =========================================================================
 *                                PORTS
 *   MOTORS
-*       LEFT DRIVE       - MOTOR 0
-*       RIGHT DRIVE      - MOTOR 1
-*       ARM MOTOR        -  
+*       LEFT DRIVE         - MOTOR 0
+*       RIGHT DRIVE        - MOTOR 1
+*       ARM MOTOR          - MOTOR 2
 *   SERVOS
-*       DROPPER SERVO    - 
+*       DROPPER SERVO      - 
 *   ENCODERS
-*       LEFT ENCODER     - P0_0
-*       RIGHT ENCODER    - P0_1
+*       LEFT ENCODER       - P0_0
+*       RIGHT ENCODER      - P0_1
 *   OTHER COMPONENTS
-*       CDS CELL (COLOR) - P1_0
-*       CDS CELL RIGHT   - P1_1
-*       CDS CELL MIDDLE  - P1_2
-*       CDS CELL LEFT    - P1_3
-*       BUMP SWITCH      - 
+*       CDS CELL (COLOR)   - P1_0
+*       OPTO SENSOR R      - P1_1
+*       OPTO SENSOR M      - P1_2
+*       OPTO SENSOR L      - P1_3
+*       BUMP SWITCH FRONT  - 
+*       BUMP SWITCH BACK L - 
+*       BUMP SWITCH BACK R - 
 ===========================================================================*/
 
 //IMPORTS
@@ -64,6 +66,7 @@ int x, y;
 void testCDS();
 void checkPoint1Code();
 void checkPoint2Code();
+void checkPoint3Code();
 void moveForward(int, double);
 void moveBackward(int, double);
 void moveBackward(int);
@@ -76,7 +79,7 @@ void startToRampTopR(int);
 
 int main() {
     //testCDS();
-    checkPoint2Code();
+    checkPoint3Code();
     //driveTest();
 }
 
@@ -140,7 +143,8 @@ void testCDS(){
 
 /*
 The main drive code for checkpoint 1
-Drives up the ramp, touches the kiosk, and drives back down the ramp*/
+Drives up the ramp, touches the kiosk, and drives back down the ramp
+*/
 void checkPoint1Code(){
     //ANY PRE-DRIVE SETUP STUFF
     int motor_percent = 40;
@@ -203,8 +207,9 @@ void checkPoint1Code(){
 
 
 /*
-The main drive code for checkpoint 1
-Drives up the ramp, touches the kiosk, and drives back down the ramp*/ 
+The main drive code for checkpoint 2
+Drives up the ramp, touches the kiosk, and drives back down the ramp
+*/ 
 void checkPoint2Code(){
     int motor_percent = 35;
     /*unused distances
@@ -327,6 +332,36 @@ void startToRampTopR(int motor_percent){
     Sleep(0.15);
 }
 
+/*
+The main drive code for checkpoint 3
+Drives towards the fuel levers, checks for which lever is to be flipped, flips lever down, waits 5 seconds, flips lever back up
+*/
+void checkPoint3Code(){
+    int motor_percent = 35;
+    int driveForward = 0;   //move towards ramp
+    int turn1 = 0; // turn to face left wall
+    int driveToLever1 = 0; //drive to fuel lever 1 position
+    int driveToLever2 = 0; //drive to fuel lever 2 position
+    int driveToLever3 = 0; //drive to fuel lever 3 position
+    int turnToLevers = 0; //turn towards the levers
+    int moveToLever = 0; //drive forward to lever
+
+    //WAIT FOR START LIGHT
+    while (cdsCell.Value() > RED_VALUE){}
+
+    moveForward(motor_percent, driveForward);  
+    rotateLeft(motor_percent, turn1);
+    int fuelLever;
+    if (fuelLever == 0) {
+        moveForward(motor_percent, driveToLever1);
+    }
+    else if (fuelLever == 1) {
+        moveForward(motor_percent, driveToLever2);
+    }
+    else if (fuelLever == 2){
+        moveForward(motor_percent, driveToLever3);
+    }
+}
 /*
 Drive function
 @param percent
