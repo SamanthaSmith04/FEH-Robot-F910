@@ -33,6 +33,8 @@
 #include <FEHServo.h>
 #include <FEHIO.h>
 #include <FEHUtility.h>
+#include <time.h>
+#include <FEHRPS.h>
 
 //CONSTANTS
 #define RIGHT_MOTOR_PORT FEHMotor::Motor1 
@@ -57,6 +59,7 @@ DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
 FEHMotor right_motor(RIGHT_MOTOR_PORT, 9.0);
 FEHMotor left_motor(LEFT_MOTOR_PORT, 9.0);
+FEHMotor arm_motor(ARM_MOTOR_PORT, 7.2);
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 
 //GLOBAL VARIABLES
@@ -75,6 +78,7 @@ void rotateLeft(int, double);
 void driveTest();
 void rotateRight(int, double);
 void startToRampTopR(int);
+void moveArm(int, double);
 
 
 int main() {
@@ -335,23 +339,39 @@ void startToRampTopR(int motor_percent){
 /*
 The main drive code for checkpoint 3
 Drives towards the fuel levers, checks for which lever is to be flipped, flips lever down, waits 5 seconds, flips lever back up
+SETUP: Robot is touching right side on stop button, 4 in away from and parallel to the wall
 */
 void checkPoint3Code(){
-    int motor_percent = 35;
-    int driveForward = 0;   //move towards ramp
-    int turn1 = 0; // turn to face left wall
-    int driveToLever1 = 0; //drive to fuel lever 1 position
-    int driveToLever2 = 0; //drive to fuel lever 2 position
-    int driveToLever3 = 0; //drive to fuel lever 3 position
-    int turnToLevers = 0; //turn towards the levers
-    int moveToLever = 0; //drive forward to lever
+    RPS.InitializeTouchMenu();
 
+    int fuelLever = RPS.GetCorrectLever();
+    LCD.Write(fuelLever);
+    int motor_percent = 35;
+    int arm_percent = 45;
+    double arm_time = 0.6;
+    int driveForward = 10;   //move towards ramp
+    int turn1 = 90; // turn to face left wall
+    int driveToLever1 = 14; //drive to fuel lever 1 position
+    int driveToLever2 = driveToLever1 + 4; //drive to fuel lever 2 position
+    int driveToLever3 = driveToLever1 + 8; //drive to fuel lever 3 position
+    int turnToLevers = 90; //turn towards the levers
+    int moveToLever = 2; //drive forward to lever
+
+    Sleep(0.4);
     //WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE){}
-
+    
     moveForward(motor_percent, driveForward);  
+    Sleep(0.2);
+
     rotateLeft(motor_percent, turn1);
-    int fuelLever;
+    Sleep(0.1);
+
+    moveBackward(motor_percent+10);//get lined up against wall
+    Sleep(0.5);
+    stopDriving();
+
+    Sleep(0.2);
     if (fuelLever == 0) {
         moveForward(motor_percent, driveToLever1);
     }
@@ -361,7 +381,44 @@ void checkPoint3Code(){
     else if (fuelLever == 2){
         moveForward(motor_percent, driveToLever3);
     }
+    Sleep(0.2); 
+
+    rotateLeft(motor_percent, turnToLevers);
+    Sleep(0.2);
+
+    moveForward(motor_percent, moveToLever);
+    Sleep(0.2);
+
+    moveArm(arm_percent, arm_time); //arm is now down
+    moveArm(-arm_percent, arm_time); //arm is now up
+    moveBackward(motor_percent, moveToLever);
+
+    Sleep(5.0);
+    moveArm(arm_percent, arm_time);
+    moveForward(motor_percent, moveToLever);
+
+    Sleep(0.2);
+    moveArm(-arm_percent, arm_time); //arm is now up
+
+    moveBackward(motor_percent, moveToLever);
+
 }
+
+/*
+Lever Arm Function
+@param speed
+    the speed that the motor will run at
+    Forward is positive (arm moves down)
+    Backwards is negative (arm moves up)
+@param timeToRun
+    The amount of time that the arm will move
+*/
+void moveArm(int speed, double timeToRun) {
+    arm_motor.SetPercent(speed);
+    Sleep(timeToRun);
+    arm_motor.Stop();
+}
+
 /*
 Drive function
 @param percent
