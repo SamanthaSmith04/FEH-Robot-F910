@@ -33,7 +33,7 @@
 #include <FEHServo.h>
 #include <FEHIO.h>
 #include <FEHUtility.h>
-#include <time.h>
+#include<ctime>
 #include <FEHRPS.h>
 
 // CONSTANTS
@@ -407,24 +407,30 @@ void checkPoint4Code()
     //tp cp4
     int motor_percent = 35;
     int arm_percent = 45;
-    double arm_time = 0.6;
+    double arm_time = 0.4;
 
-    int moveForward1 = 0;
-    int turnToLever = 0;
-    int moveToLever = 0;
+    int moveForward1 = 5;
+    int turnToLever = 90;
+    int moveToLever = 4;
     int pushLeverDistance = 0;
 
     startToRampTopR(motor_percent);
+    Sleep(0.2);
     rotateLeft(motor_percent, 90);
     Sleep(0.5);
     moveUntilBump(-motor_percent, 2);
+    Sleep(0.2);
 
     moveForward(motor_percent, moveForward1);
+    Sleep(0.2);
+    moveArm(arm_percent, arm_time);  // arm is now down
     rotateRight(motor_percent, turnToLever);
-    //arm down
+    Sleep(0.2);
 
     moveForward(motor_percent, moveToLever);
-    moveArm(arm_percent, arm_time);  // arm is now down
+    Sleep(0.2);
+
+    moveArm(-arm_percent * 2, arm_time/2);
 
 
 }
@@ -591,18 +597,44 @@ void moveUntilBump(int percent, int bumpSwitchSide)
 {
     if (percent < 0)
     {
-        moveBackward(percent);
+        moveBackward(-percent);
     }
     else {
         moveForward(percent);
     }
+
+    float startTime = TimeNow();
+    bool completed = false;
+
+    
 
     if (bumpSwitchSide == 1)
     {
         while (frontBump.Value()) {}
     }
     else if (bumpSwitchSide == 2) {
-        while (leftBump.Value() && rightBump.Value()){}
+        while ((leftBump.Value() || rightBump.Value())){
+            if (TimeNow() - startTime > 5 ){
+                stopDriving();
+                if (percent < 0)
+                {
+                    moveBackward(percent);
+                }
+                else {
+                    moveForward(-percent);
+                }
+                Sleep(1.0);
+            
+                if (percent < 0)
+                {
+                    moveBackward(-percent);
+                }
+                else {
+                    moveForward(percent);
+                }
+                startTime = TimeNow();
+            }
+        }
     }
     stopDriving();
 
