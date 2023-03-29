@@ -56,6 +56,8 @@
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 #define ROBOT_WIDTH 7.625
 #define PI 3.14159
+#define SERVO_OPEN 1000
+#define SERVO_CLOSED 2075
 
 // COMPONENTS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
@@ -67,6 +69,7 @@ AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 DigitalInputPin frontBump(FRONT_BUMP_PORT);
 DigitalInputPin leftBump(LEFT_BUMP_PORT);
 DigitalInputPin rightBump(RIGHT_BUMP_PORT);
+FEHServo dropperServo(DROPPER_SERVO_PORT); //1000 open, 2075 closed
 
 // GLOBAL VARIABLES
 int x, y;
@@ -90,9 +93,13 @@ void moveUntilBump(int, int);
 
 int main()
 {
-    // testCDS();
-    checkPoint4Code();
-    // driveTest();
+    //initialize all values
+    dropperServo.SetMin(SERVO_OPEN);
+    dropperServo.SetMax(SERVO_CLOSED); 
+    dropperServo.SetDegree(SERVO_CLOSED); //initalize to closed
+    RPS.InitializeTouchMenu();
+
+
 }
 
 /*
@@ -130,6 +137,7 @@ void driveTest()
     LCD.Write("Stopping");
     Sleep(0.5);
 }
+
 
 /*
 Used for testing the CDS cell values and prints the value to the screen
@@ -336,8 +344,6 @@ SETUP: Robot is touching right side on stop button, 4 in away from and parallel 
 */
 void checkPoint3Code()
 {
-    RPS.InitializeTouchMenu();
-
     int fuelLever = RPS.GetCorrectLever();
     LCD.Write(fuelLever);
     int motor_percent = 35;
@@ -404,7 +410,6 @@ void checkPoint3Code()
 
 void checkPoint4Code()
 {
-    //tp cp4
     int motor_percent = 35;
     int arm_percent = 45;
     double arm_time = 0.4;
@@ -435,6 +440,40 @@ void checkPoint4Code()
 
 }
 
+void checkPoint5Code(){
+    int motor_percent = 35;
+
+    int moveForwardToDropper = 0;
+    int turnTowardsDropper = 0;
+
+    int backupFromDropper = 0;
+    int turnToLWall = 0;
+    int moveAwayFromWall = 0;
+    int turnToRamp = 0;
+    int driveDownRamp = 0;
+    int turnToRightWall = 0;
+    int moveToRightWall = 0;
+    int turnToButton = 0; //WONT BE 90
+    int driveToButton = 0;
+
+    startToRampTopR(motor_percent);
+    Sleep(0.2);
+    rotateLeft(motor_percent, 90);
+    Sleep(0.5);
+    moveUntilBump(-motor_percent, 2);
+    Sleep(0.2);
+
+    moveForward(motor_percent, moveForwardToDropper);
+    Sleep(0.2);
+    rotateRight(motor_percent, 90);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 2);
+    Sleep(0.2);
+    dropperServo.SetDegree(SERVO_OPEN);
+    //LUGGAGE TASK NOW COMPLETE
+
+    Sleep(0.3);
+}
 /*
 Lever Arm Function
 @param speed
@@ -613,7 +652,8 @@ void moveUntilBump(int percent, int bumpSwitchSide)
         while (frontBump.Value()) {}
     }
     else if (bumpSwitchSide == 2) {
-        while ((leftBump.Value() || rightBump.Value())){
+        
+        while ((leftBump.Value() || rightBump.Value())){}/*
             if (TimeNow() - startTime > 5 ){
                 stopDriving();
                 if (percent < 0)
@@ -634,7 +674,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 }
                 startTime = TimeNow();
             }
-        }
+        }*/
     }
     stopDriving();
 
