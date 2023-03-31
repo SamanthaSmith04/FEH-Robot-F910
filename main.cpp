@@ -80,6 +80,7 @@ void checkPoint1Code();
 void checkPoint2Code();
 void checkPoint3Code();
 void checkPoint4Code();
+void checkPoint5Code();
 void moveForward(int, double);
 void moveBackward(int, double);
 void moveBackward(int);
@@ -98,6 +99,7 @@ int main()
     dropperServo.SetMax(SERVO_CLOSED); 
     dropperServo.SetDegree(SERVO_CLOSED); //initalize to closed
     RPS.InitializeTouchMenu();
+    checkPoint5Code();
 
 
 }
@@ -470,8 +472,27 @@ void checkPoint5Code(){
     moveUntilBump(-motor_percent, 2);
     Sleep(0.2);
     dropperServo.SetDegree(SERVO_OPEN);
+    Sleep(0.4);
     //LUGGAGE TASK NOW COMPLETE
-
+    moveForward(motor_percent, backupFromDropper);
+    Sleep(0.2);
+    rotateRight(motor_percent, turnToLWall);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 2); //now touching l wall
+    Sleep(0.2);
+    moveForward(motor_percent, moveAwayFromWall);
+    Sleep(0.2);
+    rotateRight(motor_percent, turnToButton);
+    Sleep(0.2);
+    moveForward(motor_percent, driveDownRamp);
+    Sleep(0.2);
+    rotateLeft(motor_percent, turnToRightWall);
+    Sleep(0.2);
+    moveForward(motor_percent, moveToRightWall);
+    Sleep(0.2);
+    rotateRight(motor_percent, turnToButton);
+    Sleep(0.2);
+    moveUntilBump(motor_percent, 1);
     Sleep(0.3);
 }
 /*
@@ -641,8 +662,6 @@ void moveUntilBump(int percent, int bumpSwitchSide)
     else {
         moveForward(percent);
     }
-
-    float startTime = TimeNow();
     bool completed = false;
 
     
@@ -676,6 +695,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
             }
         }*/
     }
+    Sleep(0.5);
     stopDriving();
 
 }
