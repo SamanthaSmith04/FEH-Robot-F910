@@ -99,8 +99,8 @@ int main()
     dropperServo.SetMax(SERVO_CLOSED); 
     dropperServo.SetDegree(SERVO_CLOSED); //initalize to closed
     RPS.InitializeTouchMenu();
+    checkPoint4Code();
     checkPoint5Code();
-
 
 }
 
@@ -445,8 +445,10 @@ void checkPoint4Code()
 void checkPoint5Code(){
     int motor_percent = 35;
 
-    int moveForwardToDropper = 0;
-    int turnTowardsDropper = 0;
+    int backUpFromPassport = 5;
+
+    int moveForwardToDropper = 9;
+    int turnTowardsDropper = 90;
 
     int backupFromDropper = 0;
     int turnToLWall = 0;
@@ -458,18 +460,23 @@ void checkPoint5Code(){
     int turnToButton = 0; //WONT BE 90
     int driveToButton = 0;
 
+    /* not needed because we are now using CP4 first
     startToRampTopR(motor_percent);
     Sleep(0.2);
     rotateLeft(motor_percent, 90);
     Sleep(0.5);
     moveUntilBump(-motor_percent, 2);
-    Sleep(0.2);
+    Sleep(0.2);*/
 
+    moveBackward(motor_percent, backUpFromPassport);
+    Sleep(0.2);
+    rotateLeft(motor_percent, 90);
+    Sleep(0.2);
     moveForward(motor_percent, moveForwardToDropper);
     Sleep(0.2);
     rotateRight(motor_percent, 90);
     Sleep(0.2);
-    moveUntilBump(-motor_percent, 2);
+    moveUntilBump(-motor_percent, 3);
     Sleep(0.2);
     dropperServo.SetDegree(SERVO_OPEN);
     Sleep(0.4);
@@ -652,6 +659,7 @@ Move until a bump switch is hit
     which bump switches are being used
     1 - Front extrusion
     2 - Back two bump switches
+    3 - Back up but triggers when one is pressed
 */
 void moveUntilBump(int percent, int bumpSwitchSide)
 {
@@ -663,6 +671,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
         moveForward(percent);
     }
     bool completed = false;
+    float startTime = TimeNow();
 
     
 
@@ -672,7 +681,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
     }
     else if (bumpSwitchSide == 2) {
         
-        while ((leftBump.Value() || rightBump.Value())){}/*
+        while ((leftBump.Value() || rightBump.Value())){
             if (TimeNow() - startTime > 5 ){
                 stopDriving();
                 if (percent < 0)
@@ -682,7 +691,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 else {
                     moveForward(-percent);
                 }
-                Sleep(1.0);
+                Sleep(0.5);
             
                 if (percent < 0)
                 {
@@ -693,12 +702,15 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 }
                 startTime = TimeNow();
             }
-        }*/
+        }
     }
-    Sleep(0.5);
+    else if (bumpSwitchSide == 3) {
+        while ((leftBump.Value() && rightBump.Value())){}
+    }
+    Sleep(0.1);
     stopDriving();
-
 }
+
 
 /*
 Turn Right function
