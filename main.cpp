@@ -448,7 +448,7 @@ void checkPoint5Code(){
     int backUpFromPassport = 5;
 
     int moveForwardToDropper = 9;
-    int turnTowardsDropper = 90;
+    int turnTowardsDropper =  90;
 
     int backupFromDropper = 0;
     int turnToLWall = 0;
@@ -476,7 +476,7 @@ void checkPoint5Code(){
     Sleep(0.2);
     rotateRight(motor_percent, 90);
     Sleep(0.2);
-    moveUntilBump(-motor_percent, 3);
+    moveUntilBump(-motor_percent, 2);
     Sleep(0.2);
     dropperServo.SetDegree(SERVO_OPEN);
     Sleep(0.4);
@@ -682,7 +682,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
     else if (bumpSwitchSide == 2) {
         
         while ((leftBump.Value() || rightBump.Value())){
-            if (TimeNow() - startTime > 5 ){
+            if (TimeNow() - startTime > 1){
                 stopDriving();
                 if (percent < 0)
                 {
@@ -691,8 +691,19 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 else {
                     moveForward(-percent);
                 }
-                Sleep(0.5);
-            
+                Sleep(0.1);
+                startTime = TimeNow();
+
+                float currentHeading = RPS.Heading();
+                int angleCorrection = 10;
+                if (currentHeading < 180) {
+                    rotateLeft(percent, angleCorrection);
+                }
+                else {
+                    rotateRight(percent, angleCorrection);
+                }
+                Sleep(0.2);
+
                 if (percent < 0)
                 {
                     moveBackward(-percent);
@@ -700,7 +711,6 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 else {
                     moveForward(percent);
                 }
-                startTime = TimeNow();
             }
         }
     }
