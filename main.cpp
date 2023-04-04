@@ -13,7 +13,7 @@
 *       RIGHT DRIVE        - MOTOR 1
 *       ARM MOTOR          - MOTOR 2
 *   SERVOS
-*       DROPPER SERVO      -
+*       DROPPER SERVO      - SERVO 0
 *   ENCODERS
 *       LEFT ENCODER       - P0_0
 *       RIGHT ENCODER      - P0_1
@@ -22,7 +22,7 @@
 *       OPTO SENSOR R      - P1_1
 *       OPTO SENSOR M      - P1_2
 *       OPTO SENSOR L      - P1_3
-*       BUMP SWITCH FRONT  -
+*       BUMP SWITCH FRONT  - 
 *       BUMP SWITCH BACK L -
 *       BUMP SWITCH BACK R -
 ===========================================================================*/
@@ -92,7 +92,7 @@ void driveTest();
 void rotateRight(int, double);
 void startToRampTopR(int);
 void moveArm(int, double);
-void moveUntilBump(int, int);
+void moveUntilBump(int, int, int);
 
 int main()
 {
@@ -429,7 +429,7 @@ void checkPoint4Code()
     Sleep(0.2);
     rotateLeft(motor_percent, 90);
     Sleep(0.5);
-    moveUntilBump(-motor_percent, 2);
+    moveUntilBump(-motor_percent, 2, 270);
     Sleep(0.2);
 
     moveForward(motor_percent, moveForward1);
@@ -470,7 +470,7 @@ void checkPoint5Code(){
     Sleep(0.2);
     rotateRight(motor_percent, 90);
     Sleep(0.2);
-    moveUntilBump(-motor_percent, 3);
+    moveUntilBump(-motor_percent, 3, 0);
     Sleep(0.2);
     dropperServo.SetDegree(SERVO_OPEN);
     Sleep(0.4);
@@ -481,7 +481,7 @@ void checkPoint5Code(){
     Sleep(0.2);
     moveBackward(motor_percent, 10);
     Sleep(0.2);
-    moveUntilBump(-motor_percent, 2); //now touching l wall
+    moveUntilBump(-motor_percent, 2, 90); //now touching l wall
     Sleep(0.2);
     moveForward(motor_percent, moveAwayFromWall);
     Sleep(0.2);
@@ -495,7 +495,7 @@ void checkPoint5Code(){
     Sleep(0.2);
     rotateRight(motor_percent, turnToButton);
     Sleep(0.2);
-    moveUntilBump(motor_percent, 1);
+    moveUntilBump(motor_percent, 1, 0);
     Sleep(0.3);
 }
 /*
@@ -546,7 +546,6 @@ void startToRampTopR(int motor_percent)
 void startToRampTopRWithRPS(int motor_percent)
 {
     double first_movement = 3;
-    double first_turn = 28; // 33
     double second_movement = 34;
 
     double initialHeading = RPS.Heading();
@@ -590,8 +589,7 @@ void moveForward(int percent, double inches) // using encoders
 
     // While the average of the left and right encoder is less than 90% of the distance,
     // keep running motors
-    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2)
-        ;
+    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2);
 
     // drop speed to 75% of max speed
     right_motor.SetPercent(percent * 0.8);
@@ -685,7 +683,7 @@ Move until a bump switch is hit
     2 - Back two bump switches
     3 - Back up but triggers when one is pressed
 */
-void moveUntilBump(int percent, int bumpSwitchSide)
+void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
 {
     if (percent < 0)
     {
@@ -721,11 +719,21 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 float currentHeading = RPS.Heading();
                 LCD.Write(currentHeading);
                 int angleCorrection = 10;
-                if (currentHeading < 270) {
-                    rotateRight(percent, angleCorrection);
+                if (correctionHeading < 180) {
+                    if (currentHeading < correctionHeading) {
+                        rotateRight(percent, angleCorrection);
+                    }
+                    else {
+                        rotateLeft(percent, angleCorrection);
+                    }
                 }
                 else {
-                    rotateLeft(percent, angleCorrection);
+                    if (currentHeading < correctionHeading) {
+                        rotateLeft(percent, angleCorrection);
+                    }
+                    else {
+                        rotateRight(percent, angleCorrection);
+                    }
                 }
                 Sleep(0.2);
 
