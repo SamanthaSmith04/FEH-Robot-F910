@@ -56,8 +56,10 @@
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 #define ROBOT_WIDTH 7.625
 #define PI 3.14159
-#define SERVO_OPEN 1000
-#define SERVO_CLOSED 2075
+#define SERVO_MIN 1000
+#define SERVO_MAX 2075
+#define SERVO_CLOSED 180
+#define SERVO_OPEN 45
 
 // COMPONENTS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
@@ -95,9 +97,12 @@ void moveUntilBump(int, int);
 int main()
 {
     //initialize all values
-    dropperServo.SetMin(SERVO_OPEN);
-    dropperServo.SetMax(SERVO_CLOSED); 
-    dropperServo.SetDegree(SERVO_CLOSED); //initalize to closed
+    dropperServo.SetMin(SERVO_MIN);
+    dropperServo.SetMax(SERVO_MAX); 
+
+
+    dropperServo.SetDegree(SERVO_CLOSED); 
+
     RPS.InitializeTouchMenu();
     checkPoint4Code();
     checkPoint5Code();
@@ -419,9 +424,8 @@ void checkPoint4Code()
     int moveForward1 = 5;
     int turnToLever = 90;
     int moveToLever = 4;
-    int pushLeverDistance = 0;
 
-    startToRampTopR(motor_percent);
+    startToRampTopRWithRPS(motor_percent); //USING RPS VALUES
     Sleep(0.2);
     rotateLeft(motor_percent, 90);
     Sleep(0.5);
@@ -438,8 +442,6 @@ void checkPoint4Code()
     Sleep(0.2);
 
     moveArm(-arm_percent * 2, arm_time/2);
-
-
 }
 
 void checkPoint5Code(){
@@ -450,23 +452,15 @@ void checkPoint5Code(){
     int moveForwardToDropper = 9;
     int turnTowardsDropper =  90;
 
-    int backupFromDropper = 0;
-    int turnToLWall = 0;
-    int moveAwayFromWall = 0;
-    int turnToRamp = 0;
-    int driveDownRamp = 0;
+    int backupFromDropper = 5;
+    int turnToLWall = 90;
+    int moveAwayFromWall = 5;
+    int turnToRamp = 90;
+    int driveDownRamp = 10;
     int turnToRightWall = 0;
     int moveToRightWall = 0;
     int turnToButton = 0; //WONT BE 90
     int driveToButton = 0;
-
-    /* not needed because we are now using CP4 first
-    startToRampTopR(motor_percent);
-    Sleep(0.2);
-    rotateLeft(motor_percent, 90);
-    Sleep(0.5);
-    moveUntilBump(-motor_percent, 2);
-    Sleep(0.2);*/
 
     moveBackward(motor_percent, backUpFromPassport);
     Sleep(0.2);
@@ -476,7 +470,7 @@ void checkPoint5Code(){
     Sleep(0.2);
     rotateRight(motor_percent, 90);
     Sleep(0.2);
-    moveUntilBump(-motor_percent, 2);
+    moveUntilBump(-motor_percent, 3);
     Sleep(0.2);
     dropperServo.SetDegree(SERVO_OPEN);
     Sleep(0.4);
@@ -484,6 +478,8 @@ void checkPoint5Code(){
     moveForward(motor_percent, backupFromDropper);
     Sleep(0.2);
     rotateRight(motor_percent, turnToLWall);
+    Sleep(0.2);
+    moveBackward(motor_percent, 10);
     Sleep(0.2);
     moveUntilBump(-motor_percent, 2); //now touching l wall
     Sleep(0.2);
@@ -525,7 +521,7 @@ Gets into the proper position at the top of the ramp after the light turns on
 void startToRampTopR(int motor_percent)
 {
     double first_movement = 3;
-    double first_turn = 33; // 33
+    double first_turn = 28; // 33
     double second_movement = 34;
 
     // WAIT FOR START LIGHT
@@ -536,8 +532,36 @@ void startToRampTopR(int motor_percent)
     //
     moveForward(motor_percent, first_movement);
 
+    Sleep(0.15);
+
     // turn to ramp
     rotateLeft(motor_percent, first_turn);
+    Sleep(0.15);
+
+    // go up ramp
+    moveForward(motor_percent, second_movement);
+    Sleep(0.15);
+}
+
+void startToRampTopRWithRPS(int motor_percent)
+{
+    double first_movement = 3;
+    double first_turn = 28; // 33
+    double second_movement = 34;
+
+    double initialHeading = RPS.Heading();
+    // WAIT FOR START LIGHT
+    while (cdsCell.Value() > RED_VALUE)
+    {
+    }
+    // GO
+    //
+    moveForward(motor_percent, first_movement);
+
+    Sleep(0.15);
+    double desiredHeading = 180;
+    // turn to ramp
+    rotateLeft(motor_percent, desiredHeading - initialHeading);
     Sleep(0.15);
 
     // go up ramp
@@ -680,10 +704,10 @@ void moveUntilBump(int percent, int bumpSwitchSide)
         while (frontBump.Value()) {}
     }
     else if (bumpSwitchSide == 2) {
-        
         while ((leftBump.Value() || rightBump.Value())){
-            if (TimeNow() - startTime > 1){
+            if (TimeNow() - startTime > 2 && !(leftBump.Value() || rightBump.Value())){
                 stopDriving();
+                //move away from wall
                 if (percent < 0)
                 {
                     moveBackward(percent);
@@ -691,19 +715,21 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                 else {
                     moveForward(-percent);
                 }
-                Sleep(0.1);
+                Sleep(0.2);
                 startTime = TimeNow();
 
                 float currentHeading = RPS.Heading();
+                LCD.Write(currentHeading);
                 int angleCorrection = 10;
-                if (currentHeading < 180) {
-                    rotateLeft(percent, angleCorrection);
+                if (currentHeading < 270) {
+                    rotateRight(percent, angleCorrection);
                 }
                 else {
-                    rotateRight(percent, angleCorrection);
+                    rotateLeft(percent, angleCorrection);
                 }
                 Sleep(0.2);
 
+                //go into wall again
                 if (percent < 0)
                 {
                     moveBackward(-percent);
@@ -712,6 +738,7 @@ void moveUntilBump(int percent, int bumpSwitchSide)
                     moveForward(percent);
                 }
             }
+            Sleep(0.2);
         }
     }
     else if (bumpSwitchSide == 3) {
