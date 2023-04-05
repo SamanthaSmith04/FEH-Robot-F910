@@ -112,6 +112,7 @@ void moveBackward(int, double);
 void moveBackward(int);
 void stopDriving();
 void rotateLeft(int, double);
+void rotateLeftRPS(int, double, int);
 void rotateRight(int, double);
 void startToRampTopR(int);
 void startToRampTopRWithRPS(int);
@@ -532,7 +533,7 @@ void checkPoint4Code()
 
     startToRampTopRWithRPS(motor_percent); // USING RPS VALUES
     Sleep(0.2);
-    rotateLeft(motor_percent, 90);
+    rotateLeftRPS(motor_percent, 90, 1);
     Sleep(0.5);
     moveUntilBump(-motor_percent, 2, 270);
     Sleep(0.2);
@@ -567,9 +568,9 @@ void checkPoint5Code()
     int turnToLWall = 90;
     int moveAwayFromWall = 1;
     int turnToRamp = 90;
-    int driveDownRamp = 20;
+    int driveDownRamp = 25;
     int turnToRightWall = 90;
-    int moveToRightWall = 12;
+    int moveToRightWall = 10;
     int turnToButton = 45; // WONT BE 90
 
     moveBackward(motor_percent, backUpFromPassport);
@@ -595,17 +596,17 @@ void checkPoint5Code()
     Sleep(0.2);
     moveForward(motor_percent, moveAwayFromWall);
     Sleep(0.2);
-    rotateRight(motor_percent, turnToRamp);
+    rotateLeft(motor_percent, turnToRamp);
     Sleep(0.2);
-    moveForward(motor_percent/2, driveDownRamp);
+    moveBackward(motor_percent, driveDownRamp);
+    Sleep(0.2); //now at bottom of ramp in front of levers
+    rotateLeft(motor_percent, turnToRightWall); //WILL NEED TO ADD ANOTHER TURN FOR FUEL LEVERS
     Sleep(0.2);
-    rotateLeft(motor_percent, turnToRightWall);
-    Sleep(0.2);
-    moveForward(motor_percent, moveToRightWall);
+    moveBackward(motor_percent, moveToRightWall);
     Sleep(0.2);
     rotateRight(motor_percent, turnToButton);
     Sleep(0.2);
-    moveUntilBump(motor_percent, 1, 0);
+    moveUntilBump(-motor_percent, 1, 0);
     Sleep(0.3);
 }
 
@@ -663,7 +664,7 @@ Gets into the proper position at the top of the ramp after the light turns on us
 void startToRampTopRWithRPS(int motor_percent)
 {
     double first_movement = 3;
-    double second_movement = 34;
+    double second_movement = 33;
 
     double initialHeading = RPS.Heading();
     // WAIT FOR START LIGHT
@@ -843,20 +844,17 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
 
                 float currentHeading = RPS.Heading();
                 LCD.Write(currentHeading);
-                int angleCorrection = 10;
                 if (correctionHeading < 180)
                 {
                     if (currentHeading < correctionHeading)
                     {
                         right_motor.SetPercent(-1 * percent);
                         left_motor.SetPercent(percent);
-                        Sleep(0.05);
                     }
                     else
                     {
                         right_motor.SetPercent(percent);
                         left_motor.SetPercent(-percent);
-                        Sleep(0.05);
                     }
                 }
                 else
@@ -864,17 +862,15 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
                     if (currentHeading < correctionHeading)
                     {
                         right_motor.SetPercent(-percent);
-                        left_motor.SetPercent(percent);
-                        Sleep(0.05);                 
+                        left_motor.SetPercent(percent);      
                     }
                     else
                     {
                         right_motor.SetPercent(percent);
-                        left_motor.SetPercent(-percent);
-                        Sleep(0.05);                  
+                        left_motor.SetPercent(-percent);           
                     }
                 }
-                Sleep(0.1);
+                Sleep(0.05);
 
                 // go into wall again
                 if (percent < 0)
@@ -900,7 +896,7 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
 }
 
 /*
-Turn Right function
+Turn Left function
 @param percent
     the speed that the robot should turn
 @param degrees
@@ -935,7 +931,53 @@ void rotateLeft(int percent, double degrees)
 }
 
 /*
-Turn Left function
+Turn Left RPS function
+@param percent
+    the speed that the robot should turn
+@param degrees
+    the angle that the robot will move
+@param directionCorrection
+    positive for forward, negative for backwards
+*/
+void rotateLeftRPS(int percent, double degrees, int directionCorrection)
+{
+    int counts = (ROBOT_WIDTH / 2 * degrees * (PI / 180) * 318) / CIRCUM;
+    double speedMultiplier = 0.7;
+    int fullSpeedCounts = (counts * 0.80);
+
+    // Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    // Set both motors to desired percent
+    right_motor.SetPercent(percent);
+    left_motor.SetPercent(-1 * percent);
+
+    // While the average of the left and right encoder is less than counts,
+    // keep running motors
+    float timer = TimeNow();
+    while ((right_encoder.Counts() < fullSpeedCounts * 2)) {
+        if (TimeNow() - timer > 3){
+            moveForward(percent * directionCorrection, 1);
+            fullSpeedCounts += (int)((1 / CIRCUM) * 318);
+            Sleep(0.1);
+            right_motor.SetPercent(percent);
+            left_motor.SetPercent(-1 * percent);
+            timer = TimeNow();
+        }
+    }
+    right_motor.SetPercent(percent * speedMultiplier);
+    left_motor.SetPercent(percent * speedMultiplier * -1);
+    while ((right_encoder.Counts() < counts * 2))
+        ;
+
+    // Turn off motors
+    right_motor.Stop();
+    left_motor.Stop();
+}
+
+/*
+Turn Right function
 @param percent
     the speed that the robot should turn
 @param degrees
@@ -957,12 +999,12 @@ void rotateRight(int percent, double degrees)
 
     // While the average of the left and right encoder is less than counts,
     // keep running motors
-    while ((right_encoder.Counts() < fullSpeedCounts * 2))
-        ;
+    float timer = TimeNow();
+    while ((right_encoder.Counts() < fullSpeedCounts * 2)) {
+    }
     right_motor.SetPercent(percent * speedMultiplier * -1);
     left_motor.SetPercent(percent * speedMultiplier);
-    while ((right_encoder.Counts() < counts * 2))
-        ;
+    while ((right_encoder.Counts() < counts * 2));
 
     // Turn off motors
     right_motor.Stop();
