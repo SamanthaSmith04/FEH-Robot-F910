@@ -34,6 +34,7 @@
 #include <FEHIO.h>
 #include <FEHUtility.h>
 #include <ctime>
+#include <cmath>
 #include <FEHRPS.h>
 
 /*========================================================== CONSTANTS ==========================================================*/
@@ -70,7 +71,7 @@
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 
 //MOVEMENT PARAMETERS
-#define PERCENT_SPEED 35;
+#define PERCENT_SPEED 35
 
 /*========================================================== VARIABLES ==========================================================*/
 //ENCODERS
@@ -139,8 +140,9 @@ int main()
     dropperServo.SetDegree(SERVO_CLOSED);
 
     RPS.InitializeTouchMenu();
-    checkPoint4Code();
-    checkPoint5Code();
+    passportStamp(PERCENT_SPEED);
+    luggageDrop(PERCENT_SPEED);
+    checkBoardingPass(PERCENT_SPEED);
 }
 
 /*========================================================== TASK FUNCTIONS ==========================================================*/
@@ -166,7 +168,7 @@ void passportStamp(int motor_percent) {
 
     startToRampTopRWithRPS(motor_percent); // USING RPS VALUES
     Sleep(0.2);
-    rotateLeft(motor_percent, 90);
+    rotateLeftRPS(motor_percent, 90, 1);
     Sleep(0.5);
     moveUntilBump(-motor_percent, 2, 270);
     Sleep(0.2);
@@ -181,15 +183,74 @@ void passportStamp(int motor_percent) {
     Sleep(0.2);
 
     moveArm(-arm_percent * 2, arm_time / 2);
-    Sleep(0.2);
 }
 
 void luggageDrop(int motor_percent) {
+    int backUpFromPassport = 5;
 
+    int moveForwardToDropper = 9;
+    int turnTowardsDropper = 90;
+
+    int backupFromDropper = 5;
+    int turnToLWall = 90;
+    int moveAwayFromWall = 1;
+    int turnToRamp = 90;
+    int driveDownRamp = 25;
+    int turnToRightWall = 90;
+    int moveToRightWall = 10;
+    int turnToButton = 45; // WONT BE 90
+
+    moveBackward(motor_percent, backUpFromPassport);
+    Sleep(0.2);
+    rotateLeft(motor_percent, 90);
+    Sleep(0.2);
+    moveForward(motor_percent, moveForwardToDropper);
+    Sleep(0.2);
+    rotateRight(motor_percent, 90);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 3, 0);
+    Sleep(0.2);
+    dropperServo.SetDegree(SERVO_OPEN);
+    Sleep(0.4);
+    // LUGGAGE TASK NOW COMPLETE
+    moveForward(motor_percent, backupFromDropper);
+    Sleep(0.2);
+    rotateRight(motor_percent, turnToLWall);
+    Sleep(0.2);
+    moveBackward(motor_percent, 1);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 2, 90); // now touching l wall
+    Sleep(0.2);
+    moveForward(motor_percent, moveAwayFromWall);
+    Sleep(0.2);
+    rotateLeft(motor_percent, turnToRamp);
+    Sleep(0.2);
+    moveBackward(motor_percent, driveDownRamp);
+    Sleep(0.2); //now at bottom of ramp in front of levers
+    rotateLeft(motor_percent, turnToRightWall); //WILL NEED TO ADD ANOTHER TURN FOR FUEL LEVERS
+    Sleep(0.2);
+    moveBackward(motor_percent, moveToRightWall);
+    Sleep(0.2);
+    rotateRight(motor_percent, turnToButton);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 1, 0);
+    Sleep(0.3);
 }
 
 void checkBoardingPass(int motor_percent) {
-
+    int dropperToAlmostLight = 25;
+    float LIGHTX = 0;
+    float LIGHTY = 0;
+    moveForward(motor_percent, dropperToAlmostLight);
+    float currentHeading = RPS.Heading();
+    float currentX = RPS.X();
+    float currentY = RPS.Y();
+    int desiredHeading = atan((LIGHTY - currentY)/(currentX - LIGHTX));
+    int desiredDistance = tan((LIGHTY - currentY)/(currentX - LIGHTX));
+    rotateLeft(motor_percent, desiredHeading - currentHeading);
+    moveForward(motor_percent, desiredDistance);
+    Sleep(0.2);
+    
 }
 
 void pressBoardingPass(int motor_percent) {
