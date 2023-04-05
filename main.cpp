@@ -27,7 +27,7 @@
 *       BUMP SWITCH BACK R -
 ===========================================================================*/
 
-// IMPORTS
+/*========================================================== IMPORTS ==========================================================*/
 #include <FEHLCD.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
@@ -36,7 +36,9 @@
 #include <ctime>
 #include <FEHRPS.h>
 
-// CONSTANTS
+/*========================================================== CONSTANTS ==========================================================*/
+
+//PORTS
 #define RIGHT_MOTOR_PORT FEHMotor::Motor1
 #define LEFT_MOTOR_PORT FEHMotor::Motor0
 #define ARM_MOTOR_PORT FEHMotor::Motor2
@@ -46,49 +48,70 @@
 #define CDS_M_PORT FEHIO::P1_2
 #define CDS_L_PORT FEHIO::P1_3
 #define BUMP_SWITCH_PORT FEHIO::P0_1
-#define CIRCUM (2 * 3.1415 * 3)
 #define RIGHT_ENCODER_PORT FEHIO::P0_1
 #define LEFT_ENCODER_PORT FEHIO::P0_0
 #define FRONT_BUMP_PORT FEHIO::P3_0
 #define RIGHT_BUMP_PORT FEHIO::P1_6
 #define LEFT_BUMP_PORT FEHIO::P1_7
-#define RED_VALUE 0.18
-#define BLUE_VALUE 0.80 // Arbitrary Blue Value
+
+//VALUES FOR CALCULATIONS
+#define CIRCUM (2 * 3.1415 * 3)
 #define ROBOT_WIDTH 7.625
 #define PI 3.14159
+
+//SERVO VALUES
 #define SERVO_MIN 1000
 #define SERVO_MAX 2075
 #define SERVO_CLOSED 180
 #define SERVO_OPEN 45
 
-// COMPONENTS
+//CDS CELL VALUES
+#define RED_VALUE 0.18
+#define BLUE_VALUE 0.80 // Arbitrary Blue Value
+
+//MOVEMENT PARAMETERS
+#define PERCENT_SPEED 35;
+
+/*========================================================== VARIABLES ==========================================================*/
+//ENCODERS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
+
+//MOTORS
 FEHMotor right_motor(RIGHT_MOTOR_PORT, 9.0);
 FEHMotor left_motor(LEFT_MOTOR_PORT, 9.0);
 FEHMotor arm_motor(ARM_MOTOR_PORT, 7.2);
+
+//SENSING
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 DigitalInputPin frontBump(FRONT_BUMP_PORT);
 DigitalInputPin leftBump(LEFT_BUMP_PORT);
 DigitalInputPin rightBump(RIGHT_BUMP_PORT);
+
+//SERVOS
 FEHServo dropperServo(DROPPER_SERVO_PORT); // 1000 open, 2075 closed
 
 // GLOBAL VARIABLES
 int x, y;
 
-// FUNCTION HEADERS
+/*========================================================== FUNCTION HEADERS ==========================================================*/
+//TESTING FUNCTIONS
 void testCDS();
+void driveTest();
+
+//CHECKPOINT CODE
 void checkPoint1Code();
 void checkPoint2Code();
 void checkPoint3Code();
 void checkPoint4Code();
 void checkPoint5Code();
+
+//MOVEMENT
 void moveForward(int, double);
 void moveBackward(int, double);
 void moveBackward(int);
 void stopDriving();
 void rotateLeft(int, double);
-void driveTest();
 void rotateRight(int, double);
 void startToRampTopR(int);
 void startToRampTopRWithRPS(int);
@@ -96,13 +119,16 @@ void moveArm(int, double);
 void moveUntilBump(int, int, int);
 
 //TASK FUNCTIONS
-#define PERCENT_SPEED 35;
 void passportStamp(int);
-void boardingPass(int);
 void luggageDrop(int);
+void checkBoardingPass(int);
+void pressBoardingPass(int);
+void goDownLRamp(int);
 void fuelLevers(int);
 void finalButton(int);
 
+
+/*========================================================== MAIN FUNCTION ==========================================================*/
 int main()
 {
     // initialize all values
@@ -115,6 +141,19 @@ int main()
     checkPoint4Code();
     checkPoint5Code();
 }
+
+/*========================================================== TASK FUNCTIONS ==========================================================*/
+/*
+=========== TASK ORDER ===========
+    1. Move to top ramp
+    2. Passport Stamp
+    3. Luggage Drop
+    4. Check Boarding Pass Color
+    5. Press Boarding Pass Button
+    6. Go down left ramp
+    7. Fuel Lever task
+    8. Press final button
+*/
 
 void passportStamp(int motor_percent) {
     int arm_percent = 45;
@@ -147,8 +186,32 @@ void passportStamp(int motor_percent) {
 void luggageDrop(int motor_percent) {
 
 }
+
+void checkBoardingPass(int motor_percent) {
+
+}
+
+void pressBoardingPass(int motor_percent) {
+
+}
+
+void goDownLRamp(int motor_percent) {
+
+}
+
+void fuelLevers(int motor_percent) {
+
+}
+
+void finalButton(int motor_percent) {
+
+}
+
+/*========================================================== TESTING FUNCTIONS ==========================================================*/
 /*
-DRIVING TEST CODE
+Driving test code.
+Moves forward 6 in, then back 6in. then turns 90 degrees both directions
+Ideally should return the robot to the inital position
 */
 void driveTest()
 {
@@ -210,6 +273,7 @@ void testCDS()
     }
 }
 
+/*========================================================== CHECKPOINTS ==========================================================*/
 /*
 The main drive code for checkpoint 1
 Drives up the ramp, touches the kiosk, and drives back down the ramp
@@ -452,6 +516,10 @@ void checkPoint3Code()
     moveBackward(motor_percent, moveToLever);
 }
 
+/*
+The main drive code for checkpoint 4
+Drives up the ramp to the passport stamp and flips the lever
+*/
 void checkPoint4Code()
 {
     int motor_percent = 35;
@@ -481,6 +549,11 @@ void checkPoint4Code()
     moveArm(-arm_percent * 2, arm_time / 2);
 }
 
+/*
+The main drive code for checkpoint 5
+STARTS FROM END POSITION OF CHECKPOINT 4
+Leaves passport stamp task and drops off luggage in high luggage drop. Goes down left ramp and hits end button
+*/
 void checkPoint5Code()
 {
     int motor_percent = 35;
@@ -535,6 +608,9 @@ void checkPoint5Code()
     moveUntilBump(motor_percent, 1, 0);
     Sleep(0.3);
 }
+
+
+/*========================================================== MOVEMENT ==========================================================*/
 /*
 Lever Arm Function
 @param speed
@@ -580,6 +656,10 @@ void startToRampTopR(int motor_percent)
     Sleep(0.15);
 }
 
+/*
+Drive up Ramp Function using RPS
+Gets into the proper position at the top of the ramp after the light turns on using RPS to get angle
+*/
 void startToRampTopRWithRPS(int motor_percent)
 {
     double first_movement = 3;
@@ -606,7 +686,7 @@ void startToRampTopRWithRPS(int motor_percent)
 }
 
 /*
-Drive function
+Drive forward using encoders
 @param percent
     the speed that the robot should move forward
 @param inches
@@ -642,11 +722,10 @@ void moveForward(int percent, double inches) // using encoders
     stopDriving();
 }
 
-/*Drive function
+/*
+Drive forward (starts driving, doesnt stop)
 @param percent
     the speed that the robot should move forward
-@param inches
-    the distance that the robot will move
 */
 void moveForward(int percent)
 {
@@ -655,7 +734,7 @@ void moveForward(int percent)
 }
 
 /*
-Drive function
+Drive backwards using encoders
 @param percent
     the speed that the robot should move backward
 @param inches
@@ -693,8 +772,9 @@ void moveBackward(int percent, double inches) // using encoders
 }
 
 /*
-Overloaded Drive backward function
-Only backs up, no stopping
+Drive Backward (starts driving, doesnt stop)
+@param percent
+    the speed that the robot should move backward
 */
 void moveBackward(int percent)
 {
@@ -704,6 +784,7 @@ void moveBackward(int percent)
 
 /*
 Stop function
+Stops both drive motors
 */
 void stopDriving()
 {
@@ -720,6 +801,8 @@ Move until a bump switch is hit
     1 - Front extrusion
     2 - Back two bump switches
     3 - Back up but triggers when one is pressed
+@param correctionHeading
+    the desired heading after the robot aligns to the wall
 */
 void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
 {
