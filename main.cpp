@@ -91,8 +91,17 @@ void rotateLeft(int, double);
 void driveTest();
 void rotateRight(int, double);
 void startToRampTopR(int);
+void startToRampTopRWithRPS(int);
 void moveArm(int, double);
 void moveUntilBump(int, int, int);
+
+//TASK FUNCTIONS
+#define PERCENT_SPEED 35;
+void passportStamp(int);
+void boardingPass(int);
+void luggageDrop(int);
+void fuelLevers(int);
+void finalButton(int);
 
 int main()
 {
@@ -107,6 +116,37 @@ int main()
     checkPoint5Code();
 }
 
+void passportStamp(int motor_percent) {
+    int arm_percent = 45;
+    double arm_time = 0.4;
+
+    int moveForward1 = 5;
+    int turnToLever = 90;
+    int moveToLever = 4;
+
+    startToRampTopRWithRPS(motor_percent); // USING RPS VALUES
+    Sleep(0.2);
+    rotateLeft(motor_percent, 90);
+    Sleep(0.5);
+    moveUntilBump(-motor_percent, 2, 270);
+    Sleep(0.2);
+
+    moveForward(motor_percent, moveForward1);
+    Sleep(0.2);
+    moveArm(arm_percent, arm_time); // arm is now down
+    rotateRight(motor_percent, turnToLever);
+    Sleep(0.2);
+
+    moveForward(motor_percent, moveToLever);
+    Sleep(0.2);
+
+    moveArm(-arm_percent * 2, arm_time / 2);
+    Sleep(0.2);
+}
+
+void luggageDrop(int motor_percent) {
+
+}
 /*
 DRIVING TEST CODE
 */
@@ -452,13 +492,12 @@ void checkPoint5Code()
 
     int backupFromDropper = 5;
     int turnToLWall = 90;
-    int moveAwayFromWall = 5;
+    int moveAwayFromWall = 1;
     int turnToRamp = 90;
-    int driveDownRamp = 10;
-    int turnToRightWall = 0;
-    int moveToRightWall = 0;
-    int turnToButton = 0; // WONT BE 90
-    int driveToButton = 0;
+    int driveDownRamp = 20;
+    int turnToRightWall = 90;
+    int moveToRightWall = 12;
+    int turnToButton = 45; // WONT BE 90
 
     moveBackward(motor_percent, backUpFromPassport);
     Sleep(0.2);
@@ -477,15 +516,15 @@ void checkPoint5Code()
     Sleep(0.2);
     rotateRight(motor_percent, turnToLWall);
     Sleep(0.2);
-    moveBackward(motor_percent, 10);
+    moveBackward(motor_percent, 1);
     Sleep(0.2);
     moveUntilBump(-motor_percent, 2, 90); // now touching l wall
     Sleep(0.2);
     moveForward(motor_percent, moveAwayFromWall);
     Sleep(0.2);
-    rotateRight(motor_percent, turnToButton);
+    rotateRight(motor_percent, turnToRamp);
     Sleep(0.2);
-    moveForward(motor_percent, driveDownRamp);
+    moveForward(motor_percent/2, driveDownRamp);
     Sleep(0.2);
     rotateLeft(motor_percent, turnToRightWall);
     Sleep(0.2);
@@ -705,8 +744,7 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
     {
         while ((leftBump.Value() || rightBump.Value()))
         {
-            if (TimeNow() - startTime > 2 && !(leftBump.Value() || rightBump.Value()))
-            {
+            if (TimeNow() - startTime > 2) {
                 stopDriving();
                 // move away from wall
                 if (percent < 0)
@@ -727,25 +765,33 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
                 {
                     if (currentHeading < correctionHeading)
                     {
-                        rotateRight(percent, angleCorrection);
+                        right_motor.SetPercent(-1 * percent);
+                        left_motor.SetPercent(percent);
+                        Sleep(0.05);
                     }
                     else
                     {
-                        rotateLeft(percent, angleCorrection);
+                        right_motor.SetPercent(percent);
+                        left_motor.SetPercent(-percent);
+                        Sleep(0.05);
                     }
                 }
                 else
                 {
                     if (currentHeading < correctionHeading)
                     {
-                        rotateLeft(percent, angleCorrection);
+                        right_motor.SetPercent(-percent);
+                        left_motor.SetPercent(percent);
+                        Sleep(0.05);                 
                     }
                     else
                     {
-                        rotateRight(percent, angleCorrection);
+                        right_motor.SetPercent(percent);
+                        left_motor.SetPercent(-percent);
+                        Sleep(0.05);                  
                     }
                 }
-                Sleep(0.2);
+                Sleep(0.1);
 
                 // go into wall again
                 if (percent < 0)
