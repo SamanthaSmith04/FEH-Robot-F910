@@ -41,7 +41,7 @@
 
 //PORTS
 #define RIGHT_MOTOR_PORT FEHMotor::Motor1
-#define LEFT_MOTOR_PORT FEHMotor::Motor0
+#define LEFT_MOTOR_PORT FEHMotor::Motor3
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P1_0 // CDS for COLOR
@@ -94,11 +94,13 @@ FEHServo dropperServo(DROPPER_SERVO_PORT); // 1000 open, 2075 closed
 
 // GLOBAL VARIABLES
 int x, y;
+int side = 0;
 
 /*========================================================== FUNCTION HEADERS ==========================================================*/
 //TESTING FUNCTIONS
 void testCDS();
 void driveTest();
+void rpsPoints();
 
 //CHECKPOINT CODE
 void checkPoint1Code();
@@ -140,10 +142,16 @@ int main()
     dropperServo.SetDegree(SERVO_CLOSED);
 
     RPS.InitializeTouchMenu();
-    passportStamp(PERCENT_SPEED);
-    luggageDrop(PERCENT_SPEED);
-    checkBoardingPass(PERCENT_SPEED);
-}
+    Sleep(0.3);
+    passportStamp(PERCENT_SPEED); //Starts at charger, ends at passport stamp facing 180
+    luggageDrop(PERCENT_SPEED); //Starts at passport facing 180, ends at high luggage facing 180
+    checkBoardingPass(PERCENT_SPEED); //starts at high luggage facing 180, ends at BP Light facing 180
+    pressBoardingPass(PERCENT_SPEED); //starts at BP light facing 180, ends at left wall facing 90
+    goDownLRamp(PERCENT_SPEED); //starts at left wall facing 90, ends at bottom of L ramp facing 0
+    fuelLevers(PERCENT_SPEED); //starts at bottom of L ramp facing 0, ends at middle of bottom course section facing 90
+    finalButton(PERCENT_SPEED); //starts at bottom course section facing 90, ends pressing final button
+    
+    }
 
 /*========================================================== TASK FUNCTIONS ==========================================================*/
 /*
@@ -239,8 +247,8 @@ void luggageDrop(int motor_percent) {
 
 void checkBoardingPass(int motor_percent) {
     int dropperToAlmostLight = 25;
-    float LIGHTX = 0;
-    float LIGHTY = 0;
+    float LIGHTX = 8.9;
+    float LIGHTY = 59.0;
     moveForward(motor_percent, dropperToAlmostLight);
     float currentHeading = RPS.Heading();
     float currentX = RPS.X();
@@ -250,15 +258,88 @@ void checkBoardingPass(int motor_percent) {
     rotateLeft(motor_percent, desiredHeading - currentHeading);
     moveForward(motor_percent, desiredDistance);
     Sleep(0.2);
-    
+    double CDSValue = cdsCell.Value();
+    int side = 1;
+    // display color to screen
+    if (CDSValue <= RED_VALUE)
+    {
+        LCD.SetBackgroundColor(RED);
+        side = 1;
+    }
+    else if (CDSValue <= BLUE_VALUE)
+    {
+        LCD.SetBackgroundColor(BLUE);
+        side = 0;
+    }
+    else
+    {
+        LCD.SetBackgroundColor(BLUEVIOLET);
+        side = 0; // default to blue
+    }
+    LCD.Clear();
+    LCD.Write(CDSValue);
+    Sleep(0.2);
+    rotateRight(motor_percent, RPS.Heading() - 180);
 }
 
 void pressBoardingPass(int motor_percent) {
+    int backUp5 = 10;          // back up from light 
+    int turn5 = 90;            // turn to right wall 
+    int moveForwardBlue = 6;   // move distance needed for blue button 
+    int turnBlue = 90;         // turn to blue button 
+    int moveForwardRed = 9;    // move distance needed for red button 
+    int turnRed = 90;          // turn towards red button 
+    int backupDist = 15; 
+    
+    moveBackward(motor_percent, backUp5);
+    Sleep(0.2);
 
+    rotateRight(motor_percent, turn5);
+    Sleep(0.2);
+
+    moveBackward(motor_percent + 15);
+    Sleep(1.0);
+    stopDriving();
+    Sleep(0.2);
+
+    moveForward(motor_percent, 4);
+
+    // robot now decides which button to go to
+
+    if (side == 0)
+    {
+        moveForward(motor_percent, moveForwardBlue);
+        Sleep(0.2);
+        rotateLeft(motor_percent, turnBlue);
+        Sleep(0.2);
+    }
+    else if (side == 1)
+    {
+        moveForward(motor_percent, moveForwardRed);
+        Sleep(0.2);
+        rotateLeft(motor_percent, turnRed);
+        Sleep(0.2);
+    }
+    moveUntilBump(motor_percent, 1, 0);
+    Sleep(0.2);
+    moveBackward(motor_percent, backupDist);
+    Sleep(0.2);
+    rotateRight(motor_percent, 90);
+    moveUntilBump(motor_percent, 2, 90);
+    Sleep(0.2);
 }
 
 void goDownLRamp(int motor_percent) {
+    int moveAwayFromWall = 1;
+    int turnToRamp = 90;
+    int driveDownRamp = 25;
 
+    moveForward(motor_percent, moveAwayFromWall);
+    Sleep(0.2);
+    rotateLeft(motor_percent, turnToRamp);
+    Sleep(0.2);
+    moveBackward(motor_percent, driveDownRamp);
+    Sleep(0.2); //now at bottom of ramp in front of levers
 }
 
 void fuelLevers(int motor_percent) {
@@ -333,6 +414,19 @@ void testCDS()
         LCD.Write(cdsCell.Value());
         Sleep(0.2);
     }
+}
+
+void rpsPoints(){
+        // Write initial screen info
+    LCD.WriteRC("X Position:", 11, 0);
+    LCD.WriteRC("Y Position:", 12, 0);
+    LCD.WriteRC("   Heading:", 13, 0);
+
+    LCD.WriteRC(RPS.X(), 11, 12);       // update the x coordinate
+    LCD.WriteRC(RPS.Y(), 12, 12);       // update the y coordinate
+    LCD.WriteRC(RPS.Heading(), 13, 12); // update the heading
+
+    Sleep(100); // wait for 100ms to avoid updating the screen too quickly
 }
 
 /*========================================================== CHECKPOINTS ==========================================================*/
@@ -731,6 +825,7 @@ void startToRampTopRWithRPS(int motor_percent)
     // WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE)
     {
+        rpsPoints();
     }
     // GO
     //
