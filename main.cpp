@@ -68,6 +68,7 @@
 
 //CDS CELL VALUES
 #define RED_VALUE 0.18
+
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 
 //MOVEMENT PARAMETERS
@@ -143,14 +144,13 @@ int main()
 
     RPS.InitializeTouchMenu();
     Sleep(0.3);
-
     //testCDS();
     passportStamp(PERCENT_SPEED); //Starts at charger, ends at passport stamp facing 180
     luggageDrop(PERCENT_SPEED); //Starts at passport facing 180, ends at high luggage facing 180
     checkBoardingPass(PERCENT_SPEED); //starts at high luggage facing 180, ends at BP Light facing 180
-    //pressBoardingPass(PERCENT_SPEED); //starts at BP light facing 180, ends at left wall facing 90
-    //goDownLRamp(PERCENT_SPEED); //starts at left wall facing 90, ends at bottom of L ramp facing 0
-    //fuelLevers(PERCENT_SPEED); //starts at bottom of L ramp facing 0, ends at middle of bottom course section facing 90
+    pressBoardingPass(PERCENT_SPEED); //starts at BP light facing 180, ends at left wall facing 90
+    goDownLRamp(PERCENT_SPEED); //starts at left wall facing 90, ends at bottom of L ramp facing 0
+    fuelLevers(PERCENT_SPEED); //starts at bottom of L ramp facing 0, ends at middle of bottom course section facing 90
     //finalButton(PERCENT_SPEED); //starts at bottom course section facing 90, ends pressing final button
     
     }
@@ -170,16 +170,16 @@ int main()
 
 void passportStamp(int motor_percent) {
     int arm_percent = 45;
-    double arm_time = 0.5;
+    double arm_time = 0.8;
 
     int moveForward1 = 5;
     int turnToLever = 90;
-    int moveToLever = 4;
+    int moveToLever = 5;
 
     startToRampTopRWithRPS(PERCENT_SPEED); // USING RPS VALUES
     Sleep(0.2);
     rotateLeftRPS(motor_percent, 90, 1);
-    Sleep(0.5);
+    Sleep(0.2);
     moveUntilBump(-motor_percent, 2, 270);
     Sleep(0.2);
 
@@ -192,7 +192,7 @@ void passportStamp(int motor_percent) {
     moveForward(motor_percent, moveToLever);
     Sleep(0.2);
 
-    moveArm(-arm_percent * 2, arm_time / 2);
+    moveArm(-arm_percent * 2, 0.3);
 }
 
 void luggageDrop(int motor_percent) {
@@ -220,28 +220,39 @@ void luggageDrop(int motor_percent) {
     Sleep(0.2);
     moveUntilBump(-motor_percent, 3, 0);
     Sleep(0.2);
+    moveBackward(motor_percent);
+    Sleep(0.1);
+    stopDriving();
     dropperServo.SetDegree(SERVO_OPEN);
     Sleep(0.4);
 }
 
 void checkBoardingPass(int motor_percent) {
-    int dropperToAlmostLight = 10;
-    float LIGHTX = 8.9;
-    float LIGHTY = 59.0;
-    moveForward(motor_percent, dropperToAlmostLight);
-    float currentHeading = RPS.Heading();
-    float currentX = RPS.X();
+    int turn2 = 90;            // turn towards left side wall - TB
+    int moveForward3 = 19;     // move towards left side wall - C
+    int turn3 = 90;            // turn towards light sensor - TC
+    int moveForward4 = 16;     // move towards light - D //may be eliminated
+    int moveForwardRed2 = 15;  // move to red button - I
+    
+    moveForward(motor_percent, 5);
+    Sleep(0.1);
+    rotateRight(motor_percent, 90);
+    Sleep(0.1);
+    moveUntilBump(-motor_percent, 2, 90);
+    Sleep(0.1);
+
+    
+    moveForward(motor_percent, 4);
+    Sleep(0.1);
+
+    rotateLeft(motor_percent, turn3);
+    Sleep(0.1);
     float currentY = RPS.Y();
-    int desiredHeading = atan((LIGHTY - currentY)/(currentX - LIGHTX)) * 180 / PI;
-    LCD.Write(desiredHeading);
-    LCD.Write("-----");
-    LCD.Write(currentHeading);
-    int desiredDistance = pow(pow(LIGHTY - currentY,2)+pow(currentX - LIGHTX,2), 0.5);
-    rotateLeft(motor_percent, desiredHeading - 270 - currentHeading);
-    moveForward(motor_percent, desiredDistance);
-    /*Sleep(0.2);
+    float lightY = 61;
+    moveForward(motor_percent, lightY - currentY); // LIGHT IS CHECKED HERE
+    Sleep(0.1);
     double CDSValue = cdsCell.Value();
-    int side = 1;
+
     // display color to screen
     if (CDSValue <= RED_VALUE)
     {
@@ -255,13 +266,13 @@ void checkBoardingPass(int motor_percent) {
     }
     else
     {
-        LCD.SetBackgroundColor(BLUEVIOLET);
+        LCD.SetBackgroundColor(YELLOW);
         side = 0; // default to blue
-    }
+    }       
     LCD.Clear();
     LCD.Write(CDSValue);
     Sleep(0.2);
-    rotateRight(motor_percent, RPS.Heading() - 180);*/
+    rotateRight(motor_percent, RPS.Heading() - 180);
 }
 
 void pressBoardingPass(int motor_percent) {
@@ -279,9 +290,7 @@ void pressBoardingPass(int motor_percent) {
     rotateRight(motor_percent, turn5);
     Sleep(0.2);
 
-    moveBackward(motor_percent + 15);
-    Sleep(1.0);
-    stopDriving();
+    moveUntilBump(-motor_percent, 2, 90);
     Sleep(0.2);
 
     moveForward(motor_percent, 4);
@@ -302,12 +311,13 @@ void pressBoardingPass(int motor_percent) {
         rotateLeft(motor_percent, turnRed);
         Sleep(0.2);
     }
-    moveUntilBump(motor_percent, 1, 0);
-    Sleep(0.2);
+    moveBackward(-motor_percent); //hitting button
+    Sleep(3.0);
     moveBackward(motor_percent, backupDist);
     Sleep(0.2);
     rotateRight(motor_percent, 90);
-    moveUntilBump(motor_percent, 2, 90);
+    Sleep(0.2);
+    moveUntilBump(-motor_percent, 2, 90);
     Sleep(0.2);
 }
 
@@ -325,7 +335,41 @@ void goDownLRamp(int motor_percent) {
 }
 
 void fuelLevers(int motor_percent) {
+    rotateLeft(motor_percent, 180);
+    Sleep(0.1);
+    int fuelLeverNum = RPS.GetCorrectLever();
+    int arm_percent = 45;
+    double arm_time = 0.6;
+    int moveToLever = 2;     
+    int lever1 = 4;
+    int lever2 = 8; 
 
+    if (fuelLeverNum == 1) {
+        rotateLeft(motor_percent, 90);
+        moveForward(motor_percent, lever1);
+        rotateRight(motor_percent, 90);
+    }
+    else if (fuelLeverNum == 2) {
+        rotateLeft(motor_percent, 90); 
+        moveForward(motor_percent, lever2);
+        rotateRight(motor_percent, 90);
+    }
+    
+    moveForward(motor_percent, moveToLever);
+    Sleep(0.2);
+
+    moveArm(arm_percent, arm_time);  // arm is now down
+    moveArm(-arm_percent, arm_time); // arm is now up
+    moveBackward(motor_percent, moveToLever);
+
+    Sleep(5.0);
+    moveArm(arm_percent, arm_time);
+    moveForward(motor_percent, moveToLever);
+
+    Sleep(0.2);
+    moveArm(-arm_percent, arm_time); // arm is now up
+
+    moveBackward(motor_percent, moveToLever);
 }
 
 void finalButton(int motor_percent) {
@@ -801,14 +845,13 @@ Gets into the proper position at the top of the ramp after the light turns on us
 void startToRampTopRWithRPS(int motor_percent)
 {
     double first_movement = 3;
-    double second_movement = 33;
-
-    double initialHeading = RPS.Heading();
+    double second_movement = 34;
     // WAIT FOR START LIGHT
     while (cdsCell.Value() > RED_VALUE)
     {
         //rpsPoints();
     }
+    double initialHeading = RPS.Heading();
     LCD.Write(initialHeading);
     // GO
     //
@@ -967,7 +1010,7 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
     {
         while ((leftBump.Value() || rightBump.Value()))
         {
-            if (TimeNow() - startTime > 1.5) {
+            if (TimeNow() - startTime > 1) {
                 stopDriving();
                 // move away from wall
                 if (percent < 0)
@@ -978,7 +1021,7 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
                 {
                     moveForward(-percent);
                 }
-                Sleep(0.2);
+                Sleep(0.15);
                 startTime = TimeNow();
 
                 float currentHeading = RPS.Heading();
@@ -1009,7 +1052,7 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
                         left_motor.SetPercent(-percent);           
                     }
                 }
-                Sleep(0.05);
+                Sleep(0.08);
 
                 // go into wall again
                 if (percent < 0)
