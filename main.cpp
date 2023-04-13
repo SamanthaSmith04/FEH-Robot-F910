@@ -67,7 +67,7 @@
 #define SERVO_OPEN 45
 
 //CDS CELL VALUES
-#define RED_VALUE 0.18
+#define RED_VALUE 0.25 //old 0.18
 
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 
@@ -152,7 +152,7 @@ int main()
     pressBoardingPass(PERCENT_SPEED); //starts at BP light facing 180, ends at left wall facing 90
     goDownLRamp(PERCENT_SPEED); //starts at left wall facing 90, ends at bottom of L ramp facing 0
     fuelLevers(PERCENT_SPEED); //starts at bottom of L ramp facing 0, ends at middle of bottom course section facing 90
-    //finalButton(PERCENT_SPEED); //starts at bottom course section facing 90, ends pressing final button
+    finalButton(PERCENT_SPEED); //starts at bottom course section facing 90, ends pressing final button
     
     }
 
@@ -229,11 +229,11 @@ void luggageDrop(int motor_percent) {
 }
 
 void checkBoardingPass(int motor_percent) {
-    int dropperToAlmostLight = 9;
+    int dropperToAlmostLight = 10;
     float LIGHTX = 9.09;
     float LIGHTY = 53.3;
     float QRtoCDSX = 3.5;
-    float QRtoCDSY = 4.0;
+    float QRtoCDSY = 5.0;
     moveForward(motor_percent, dropperToAlmostLight);
     float currentHeading = RPS.Heading();
     float currentX = RPS.X() + QRtoCDSX;
@@ -246,12 +246,11 @@ void checkBoardingPass(int motor_percent) {
     int desiredDistance = pow(pow(LIGHTY - currentY,2)+pow(currentX - LIGHTX,2), 0.5);    
     Sleep(PAUSETIME);
 
-    moveForward(motor_percent, 3);
-    rotateLeft(motor_percent, desiredHeading + 3); 
+    rotateLeft(motor_percent, 90 -  desiredHeading); 
     Sleep(PAUSETIME);
 
-    moveForward(motor_percent, desiredDistance + 1);
-    Sleep(PAUSETIME);
+    moveForward(motor_percent, desiredDistance + 3);
+    Sleep(0.5);
     double CDSValue = cdsCell.Value();
     side = 1;
     // display color to screen
@@ -296,6 +295,7 @@ void pressBoardingPass(int motor_percent) {
     Sleep(PAUSETIME);
 
     moveForward(motor_percent, 4);
+    Sleep(PAUSETIME);
 
     // robot now decides which button to go to
 
@@ -339,20 +339,23 @@ void goDownLRamp(int motor_percent) {
 
 void fuelLevers(int motor_percent) {
     rotateLeft(motor_percent, 180);
-    Sleep(0.1);
+    Sleep(PAUSETIME);
     int fuelLeverNum = RPS.GetCorrectLever();
     int arm_percent = 45;
     double arm_time = 0.6;
-    int moveToLever = 2;     
+    int moveToLever = 3;     
     int lever1 = 4;
     int lever2 = 8; 
 
-    if (fuelLeverNum == 1) {
+    if (fuelLeverNum == 2) {
+        rotateRight(motor_percent, 2);
+    }
+    else if (fuelLeverNum == 1) {
         rotateLeft(motor_percent, 90);
         moveForward(motor_percent, lever1);
         rotateRight(motor_percent, 90);
     }
-    else if (fuelLeverNum == 2) {
+    else if (fuelLeverNum == 0) {
         rotateLeft(motor_percent, 90); 
         moveForward(motor_percent, lever2);
         rotateRight(motor_percent, 90);
@@ -376,6 +379,28 @@ void fuelLevers(int motor_percent) {
 }
 
 void finalButton(int motor_percent) {
+    Sleep(PAUSETIME);
+    int fuelLeverNum = RPS.GetCorrectLever();
+    rotateRight(motor_percent, 90);
+    Sleep(PAUSETIME);
+    if (fuelLeverNum == 0) {
+        moveBackward(motor_percent, 12);
+        rotateLeft(motor_percent, 2);
+    }
+    else if (fuelLeverNum == 1) {
+        moveBackward(motor_percent, 8);
+    }
+    else if (fuelLeverNum == 2) {
+        moveBackward(motor_percent, 4);
+    }
+    Sleep(PAUSETIME);
+
+    moveBackward(motor_percent, 2); //this may need to change
+    Sleep(PAUSETIME);   
+
+    rotateRight(motor_percent, 45);
+    Sleep(PAUSETIME);
+    moveBackward(motor_percent*2);
 
 }
 
