@@ -71,9 +71,19 @@
 
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 
+//Optosensor value
+#define LINE_VALUE 1.7
+
 //MOVEMENT PARAMETERS
 #define PERCENT_SPEED 35
 #define PAUSETIME 0.2
+#define LINE_FOLLOW_SPEED 25
+
+enum LineStates{
+    MIDDLE,
+    RIGHT,
+    LEFT
+}
 
 /*================================================== VARIABLES ==================================================*/
 //ENCODERS
@@ -87,6 +97,9 @@ FEHMotor arm_motor(ARM_MOTOR_PORT, 7.2);
 
 //SENSING
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
+AnalogInputPin leftOpt(CDS_L_PORT);
+AnalogInputPin rightOpt(CDS_R_PORT);
+AnalogInputPin midOPT(CDS_M_PORT);
 DigitalInputPin frontBump(FRONT_BUMP_PORT);
 DigitalInputPin leftBump(LEFT_BUMP_PORT);
 DigitalInputPin rightBump(RIGHT_BUMP_PORT);
@@ -97,6 +110,7 @@ FEHServo dropperServo(DROPPER_SERVO_PORT); // 1000 open, 2075 closed
 // GLOBAL VARIABLES
 int x, y;
 int side = 0;
+double maxLight =0;
 
 /*================================================== FUNCTION HEADERS ==================================================*/
 //TESTING FUNCTIONS
@@ -123,6 +137,8 @@ void startToRampTopR(int);
 void startToRampTopRWithRPS(int);
 void moveArm(int, double);
 void moveUntilBump(int, int, int);
+void lineFollowToStop(int);
+void moveUpdateMaxLight(int double);
 
 //TASK FUNCTIONS
 void passportStamp(int);
@@ -254,6 +270,31 @@ void checkBoardingPass(int motor_percent) {
     Sleep(0.5);
     double CDSValue = cdsCell.Value();
     side = 1;
+
+    /* John Ulm implementation
+    moveForward(motor_percent,10.0);
+    lineFollowToStop();
+    moveUpdateMaxLight(motor_percent,2);
+
+    if (maxLight <= RED_VALUE)
+    {
+        LCD.SetBackgroundColor(RED);
+        side = 1;
+    }
+    else if (maxLight <= BLUE_VALUE)
+    {
+        LCD.SetBackgroundColor(BLUE);
+        side = 0;
+    }
+    else
+    {
+        LCD.SetBackgroundColor(YELLOW);
+        side = 1; // default to red
+    }
+    
+    
+    */
+
     // display color to screen
     if (CDSValue <= RED_VALUE)
     {
@@ -275,6 +316,7 @@ void checkBoardingPass(int motor_percent) {
     Sleep(PAUSETIME);
     rotateRight(motor_percent, RPS.Heading() - 180);
     Sleep(PAUSETIME);
+    
 }
 
 void pressBoardingPass(int motor_percent) {
@@ -1111,6 +1153,114 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
     }
     Sleep(0.1);
     stopDriving();
+}
+
+
+/*
+Drive forward using encoders and updates maxLight
+@param percent
+    the speed that the robot should move forward
+@param inches
+    the distance that the robot will move
+*/
+void moveUpdateMaxLight(int percent, double inches){
+int counts = (int)((inches / CIRCUM) * 318);
+    int fullSpeedCounts = (counts * 0.90);
+    // Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    // Set both motors to desired percent
+    right_motor.SetPercent(percent);
+    left_motor.SetPercent(percent);
+
+    // While the average of the left and right encoder is less than 90% of the distance,
+    // keep running motors
+    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2){
+        maxLight=cdsCell.Value();
+    }
+        ;
+
+    // drop speed to 75% of max speed
+    right_motor.SetPercent(percent * 0.8);
+    left_motor.SetPercent(percent * 0.8);
+
+    // While the average of the left and right encoder is less than the full distance,
+    // keep running motors
+    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2){
+        maxLight=cdsCell.Value();
+    }
+        ;
+
+    // Turn off motors
+    stopDriving();
+
+}
+
+
+/*
+Assumes that the robot is aligned roughly parallel to the line
+Will stop as soon as it no longer senses a line
+
+    @param percent
+        motor speed
+*/
+void lineFollowToStop(int percent){
+    //senses if any optosensor sees the line
+    bool anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+    int state =RIGHT;
+    //moves directly forward before seeing optosensor
+    while(!anySens){
+        right_motor.SetPercent(percent);
+        left_motor.SetPercent(percent);
+
+        anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+    }
+    //starts line following
+    while(anySens){
+        anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+        
+        //determines what turn it needs to make
+        if(midOpt.value<LINE_VALUE){
+            state=MIDDLE;
+        }
+        else if(rightOpt.value<LINE_VALUE){
+            state=RIGHT;
+        }
+        else if(leftOpt.value<LINE_VALUE){
+            state=LEFT;
+        }
+        
+        switch(state){
+
+            //no turn
+            case MIDDLE:
+                right_motor.SetPercent(percent);
+                left_motor.SetPercent(percent);
+
+                break;
+
+            //turn right
+            case RIGHT:
+                right_motor.SetPercent(percent);
+                left_motor.SetPercent(percent-10);
+                
+
+                break;
+
+            //turn left
+            case LEFT:
+                right_motor.SetPercent(percent-10);
+                left_motor.SetPercent(percent);
+
+                break;
+
+        }
+
+    }
+
+    right_motor.SetPercent(0);
+    left_motor.SetPercent(0);
 }
 
 /*
