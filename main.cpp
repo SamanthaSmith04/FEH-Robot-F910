@@ -1177,9 +1177,12 @@ int counts = (int)((inches / CIRCUM) * 318);
     // While the average of the left and right encoder is less than 90% of the distance,
     // keep running motors
     while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2){
-        maxLight=cdsCell.Value();
+        if(cdsCell.Value()>maxLight){
+            maxLight=cdsCell.Value();
+        }
+        
+        
     }
-        ;
 
     // drop speed to 75% of max speed
     right_motor.SetPercent(percent * 0.8);
@@ -1188,9 +1191,10 @@ int counts = (int)((inches / CIRCUM) * 318);
     // While the average of the left and right encoder is less than the full distance,
     // keep running motors
     while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2){
-        maxLight=cdsCell.Value();
+        if(cdsCell.Value()>maxLight){
+            maxLight=cdsCell.Value();
+        }
     }
-        ;
 
     // Turn off motors
     stopDriving();
@@ -1220,6 +1224,11 @@ void lineFollowToStop(int percent){
     while(anySens){
         anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
         
+        //just in case it sees the light during this time
+        if(cdsCell.Value()>maxLight){
+            maxLight=cdsCell.Value();
+        }
+
         //determines what turn it needs to make
         if(midOpt.value<LINE_VALUE){
             state=MIDDLE;
