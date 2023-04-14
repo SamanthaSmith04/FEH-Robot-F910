@@ -1,12 +1,12 @@
-/* =========================================================================
+/* =========================================================
 *                       FEH Robot Project Group 910F
 *
 *Group Members: Searita Chen, Bennett Godinho-Nelson, Samantha Smith, John Ulm
 *
 *                             Robot Code
-===========================================================================*/
+===================================================*/
 
-/* =========================================================================
+/* =========================================================
 *                                PORTS
 *   MOTORS
 *       LEFT DRIVE         - MOTOR 0
@@ -25,9 +25,9 @@
 *       BUMP SWITCH FRONT  -
 *       BUMP SWITCH BACK L -
 *       BUMP SWITCH BACK R -
-===========================================================================*/
+===================================================*/
 
-/*========================================================== IMPORTS ==========================================================*/
+/*================================================== IMPORTS ==================================================*/
 #include <FEHLCD.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
@@ -37,7 +37,7 @@
 #include <cmath>
 #include <FEHRPS.h>
 
-/*========================================================== CONSTANTS ==========================================================*/
+/*================================================== CONSTANTS ==================================================*/
 
 //PORTS
 #define RIGHT_MOTOR_PORT FEHMotor::Motor1
@@ -75,7 +75,7 @@
 #define PERCENT_SPEED 35
 #define PAUSETIME 0.2
 
-/*========================================================== VARIABLES ==========================================================*/
+/*================================================== VARIABLES ==================================================*/
 //ENCODERS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
@@ -98,7 +98,7 @@ FEHServo dropperServo(DROPPER_SERVO_PORT); // 1000 open, 2075 closed
 int x, y;
 int side = 0;
 
-/*========================================================== FUNCTION HEADERS ==========================================================*/
+/*================================================== FUNCTION HEADERS ==================================================*/
 //TESTING FUNCTIONS
 void testCDS();
 void driveTest();
@@ -134,7 +134,7 @@ void fuelLevers(int);
 void finalButton(int);
 
 
-/*========================================================== MAIN FUNCTION ==========================================================*/
+/*================================================== MAIN FUNCTION ==================================================*/
 int main()
 {
     // initialize all values
@@ -156,7 +156,7 @@ int main()
     
     }
 
-/*========================================================== TASK FUNCTIONS ==========================================================*/
+/*================================================== TASK FUNCTIONS ==================================================*/
 /*
 =========== TASK ORDER ===========
     1. Move to top ramp
@@ -175,7 +175,7 @@ void passportStamp(int motor_percent) {
 
     int moveForward1 = 5;
     int turnToLever = 90;
-    int moveToLever = 5;
+    int moveToLever = 4;
 
     startToRampTopRWithRPS(PERCENT_SPEED); // USING RPS VALUES
     Sleep(PAUSETIME);
@@ -230,23 +230,24 @@ void luggageDrop(int motor_percent) {
 
 void checkBoardingPass(int motor_percent) {
     int dropperToAlmostLight = 10;
-    float LIGHTX = 9.09;
-    float LIGHTY = 53.3;
+
     float QRtoCDSX = 3.5;
     float QRtoCDSY = 5.0;
+    float LIGHTX = 9.09 + QRtoCDSX;
+    float LIGHTY = 53.3 + QRtoCDSY;
     moveForward(motor_percent, dropperToAlmostLight);
     float currentHeading = RPS.Heading();
     float currentX = RPS.X() + QRtoCDSX;
     float currentY = RPS.Y() + QRtoCDSY;
     int desiredHeading = atan((LIGHTY - currentY)/(currentX - LIGHTX)) * 180.0 / PI;
     LCD.Clear();
-    LCD.Write(desiredHeading);
+    LCD.Write(desiredHeading + currentHeading);
     LCD.Write("\n");
     LCD.Write(currentHeading);
     int desiredDistance = pow(pow(LIGHTY - currentY,2)+pow(currentX - LIGHTX,2), 0.5);    
     Sleep(PAUSETIME);
 
-    rotateLeft(motor_percent, 90 -  desiredHeading); 
+    rotateLeft(motor_percent, 90 - desiredHeading); 
     Sleep(PAUSETIME);
 
     moveForward(motor_percent, desiredDistance + 3);
@@ -343,12 +344,15 @@ void fuelLevers(int motor_percent) {
     int fuelLeverNum = RPS.GetCorrectLever();
     int arm_percent = 45;
     double arm_time = 0.6;
-    int moveToLever = 3;     
-    int lever1 = 4;
-    int lever2 = 8; 
+    int moveToLever = 2;     
+    int lever1 = 6;
+    int lever2 = 10; 
+
 
     if (fuelLeverNum == 2) {
-        rotateRight(motor_percent, 2);
+        rotateLeft(motor_percent, 90);
+        moveForward(motor_percent, 2);
+        rotateRight(motor_percent, 90);
     }
     else if (fuelLeverNum == 1) {
         rotateLeft(motor_percent, 90);
@@ -383,14 +387,14 @@ void finalButton(int motor_percent) {
     int fuelLeverNum = RPS.GetCorrectLever();
     rotateRight(motor_percent, 90);
     Sleep(PAUSETIME);
-    if (fuelLeverNum == 0) {
+    if (fuelLeverNum == 2) {
         moveBackward(motor_percent, 12);
         rotateLeft(motor_percent, 2);
     }
     else if (fuelLeverNum == 1) {
         moveBackward(motor_percent, 8);
     }
-    else if (fuelLeverNum == 2) {
+    else if (fuelLeverNum == 0) {
         moveBackward(motor_percent, 4);
     }
     Sleep(PAUSETIME);
@@ -404,7 +408,7 @@ void finalButton(int motor_percent) {
 
 }
 
-/*========================================================== TESTING FUNCTIONS ==========================================================*/
+/*================================================== TESTING FUNCTIONS ==================================================*/
 /*
 Driving test code.
 Moves forward 6 in, then back 6in. then turns 90 degrees both directions
@@ -483,7 +487,7 @@ void rpsPoints(){
     Sleep(100); // wait for 100ms to avoid updating the screen too quickly
 }
 
-/*========================================================== CHECKPOINTS ==========================================================*/
+/*================================================== CHECKPOINTS ==================================================*/
 /*
 The main drive code for checkpoint 1
 Drives up the ramp, touches the kiosk, and drives back down the ramp
@@ -820,7 +824,7 @@ void checkPoint5Code()
 }
 
 
-/*========================================================== MOVEMENT ==========================================================*/
+/*================================================== MOVEMENT ==================================================*/
 /*
 Lever Arm Function
 @param speed
@@ -1097,8 +1101,12 @@ void moveUntilBump(int percent, int bumpSwitchSide, int correctionHeading)
     }
     else if (bumpSwitchSide == 3)
     {
+
         while ((leftBump.Value() && rightBump.Value()))
         {
+            if (TimeNow() - startTime > 4) {
+                break;
+            }
         }
     }
     Sleep(0.1);
