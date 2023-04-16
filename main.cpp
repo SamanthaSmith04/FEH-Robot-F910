@@ -45,9 +45,9 @@
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P1_0 // CDS for COLOR
-#define CDS_R_PORT FEHIO::P1_1
-#define CDS_M_PORT FEHIO::P1_2
-#define CDS_L_PORT FEHIO::P1_3
+#define CDS_R_PORT FEHIO::P0_7
+#define CDS_M_PORT FEHIO::P0_6
+#define CDS_L_PORT FEHIO::P0_4
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 #define RIGHT_ENCODER_PORT FEHIO::P0_1
 #define LEFT_ENCODER_PORT FEHIO::P0_0
@@ -99,7 +99,7 @@ FEHMotor arm_motor(ARM_MOTOR_PORT, 7.2);
 AnalogInputPin cdsCell(CDS_SENSOR_PORT);
 AnalogInputPin leftOpt(CDS_L_PORT);
 AnalogInputPin rightOpt(CDS_R_PORT);
-AnalogInputPin midOPT(CDS_M_PORT);
+AnalogInputPin midOpt(CDS_M_PORT);
 DigitalInputPin frontBump(FRONT_BUMP_PORT);
 DigitalInputPin leftBump(LEFT_BUMP_PORT);
 DigitalInputPin rightBump(RIGHT_BUMP_PORT);
@@ -1211,18 +1211,18 @@ Will stop as soon as it no longer senses a line
 */
 void lineFollowToStop(int percent){
     //senses if any optosensor sees the line
-    bool anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+    bool anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
     int state =RIGHT;
     //moves directly forward before seeing optosensor
     while(!anySens){
         right_motor.SetPercent(percent);
         left_motor.SetPercent(percent);
 
-        anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
     }
     //starts line following
     while(anySens){
-        anySens = rightOpt.value()<LINE_VALUE || leftOpt.value()<LINE_VALUE ||midOpt.value()<LINE_VALUE;
+        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
         
         //just in case it sees the light during this time
         if(cdsCell.Value()>maxLight){
@@ -1230,13 +1230,13 @@ void lineFollowToStop(int percent){
         }
 
         //determines what turn it needs to make
-        if(midOpt.value<LINE_VALUE){
+        if(midOpt.Value()<LINE_VALUE){
             state=MIDDLE;
         }
-        else if(rightOpt.value<LINE_VALUE){
+        else if(rightOpt.Value()<LINE_VALUE){
             state=RIGHT;
         }
-        else if(leftOpt.value<LINE_VALUE){
+        else if(leftOpt.Value()<LINE_VALUE){
             state=LEFT;
         }
         
