@@ -83,7 +83,7 @@ enum LineStates{
     MIDDLE,
     RIGHT,
     LEFT
-}
+};
 
 /*================================================== VARIABLES ==================================================*/
 //ENCODERS
@@ -138,7 +138,7 @@ void startToRampTopRWithRPS(int);
 void moveArm(int, double);
 void moveUntilBump(int, int, int);
 void lineFollowToStop(int);
-void moveUpdateMaxLight(int double);
+void moveUpdateMaxLight(int, double);
 
 //TASK FUNCTIONS
 void passportStamp(int);
