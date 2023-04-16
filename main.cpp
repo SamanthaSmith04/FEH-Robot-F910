@@ -100,16 +100,16 @@ int side = 0;
 
 /*================================================== FUNCTION HEADERS ==================================================*/
 //TESTING FUNCTIONS
-void testCDS();
-void driveTest();
-void rpsPoints();
+void testCDS(); //TODO - Remove later
+void driveTest(); //TODO - Remove later
+void rpsPoints(); //TODO - Remove later
 
 //CHECKPOINT CODE
-void checkPoint1Code();
-void checkPoint2Code();
-void checkPoint3Code();
-void checkPoint4Code();
-void checkPoint5Code();
+void checkPoint1Code(); //TODO - Remove later
+void checkPoint2Code(); //TODO - Remove later
+void checkPoint3Code(); //TODO - Remove later
+void checkPoint4Code(); //TODO - Remove later
+void checkPoint5Code(); //TODO - Remove later
 
 //MOVEMENT
 void moveForward(int, double);
@@ -119,7 +119,7 @@ void stopDriving();
 void rotateLeft(int, double);
 void rotateLeftRPS(int, double, int);
 void rotateRight(int, double);
-void startToRampTopR(int);
+void startToRampTopR(int); //TODO - Remove later
 void startToRampTopRWithRPS(int);
 void moveArm(int, double);
 void moveUntilBump(int, int, int);
