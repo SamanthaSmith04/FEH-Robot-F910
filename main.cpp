@@ -273,7 +273,8 @@ void checkBoardingPass(int motor_percent) {
 
     /* John Ulm implementation
     moveForward(motor_percent,10.0);
-    lineFollowToStop();
+    rotateLeft(motor_percent, 10);
+    lineFollowToStop(LINE_FOLLOW_SPEED);
     moveUpdateMaxLight(motor_percent,2);
 
     if (maxLight <= RED_VALUE)
