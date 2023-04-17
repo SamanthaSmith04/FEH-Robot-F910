@@ -72,7 +72,7 @@
 #define BLUE_VALUE 0.80 // Arbitrary Blue Value
 
 //Optosensor value
-#define LINE_VALUE 1.7
+#define LINE_VALUE 3.0
 
 //MOVEMENT PARAMETERS
 #define PERCENT_SPEED 35
@@ -83,7 +83,7 @@ enum LineStates{
     MIDDLE,
     RIGHT,
     LEFT
-}
+};
 
 /*================================================== VARIABLES ==================================================*/
 //ENCODERS
@@ -138,7 +138,7 @@ void startToRampTopRWithRPS(int);
 void moveArm(int, double);
 void moveUntilBump(int, int, int);
 void lineFollowToStop(int);
-void moveUpdateMaxLight(int double);
+void moveUpdateMaxLight(int, double);
 
 //TASK FUNCTIONS
 void passportStamp(int);
@@ -245,7 +245,7 @@ void luggageDrop(int motor_percent) {
 }
 
 void checkBoardingPass(int motor_percent) {
-    int dropperToAlmostLight = 10;
+    /* int dropperToAlmostLight = 10;
 
     float QRtoCDSX = 3.5;
     float QRtoCDSY = 5.0;
@@ -269,11 +269,11 @@ void checkBoardingPass(int motor_percent) {
     moveForward(motor_percent, desiredDistance + 3);
     Sleep(0.5);
     double CDSValue = cdsCell.Value();
-    side = 1;
+    side = 1; */
 
-    /* John Ulm implementation
-    moveForward(motor_percent,10.0);
-    rotateLeft(motor_percent, 10);
+    /* John Ulm implementation */
+    moveForward(motor_percent,6.0);
+    rotateLeft(motor_percent, 40);
     lineFollowToStop(LINE_FOLLOW_SPEED);
     moveUpdateMaxLight(motor_percent,2);
 
@@ -292,9 +292,9 @@ void checkBoardingPass(int motor_percent) {
         LCD.SetBackgroundColor(YELLOW);
         side = 1; // default to red
     }
+    double CDSValue= maxLight;
+    /* End John Ulm implementation*/
     
-    
-    */
 
     // display color to screen
     if (CDSValue <= RED_VALUE)
@@ -1212,18 +1212,21 @@ Will stop as soon as it no longer senses a line
 */
 void lineFollowToStop(int percent){
     //senses if any optosensor sees the line
-    bool anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
+    bool anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE;
     int state =RIGHT;
     //moves directly forward before seeing optosensor
+    LCD.Clear();
     while(!anySens){
+        
+        LCD.DrawRectangle(0,0, 319, 239);
         right_motor.SetPercent(percent);
         left_motor.SetPercent(percent);
 
-        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
+        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE;
     }
     //starts line following
     while(anySens){
-        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE ||midOpt.Value()<LINE_VALUE;
+        anySens = rightOpt.Value()<LINE_VALUE || leftOpt.Value()<LINE_VALUE;
         
         //just in case it sees the light during this time
         if(cdsCell.Value()>maxLight){
@@ -1231,14 +1234,13 @@ void lineFollowToStop(int percent){
         }
 
         //determines what turn it needs to make
-        if(midOpt.Value()<LINE_VALUE){
-            state=MIDDLE;
-        }
-        else if(rightOpt.Value()<LINE_VALUE){
+        if(rightOpt.Value()<LINE_VALUE){
             state=RIGHT;
+            LCD.Clear();
         }
         else if(leftOpt.Value()<LINE_VALUE){
             state=LEFT;
+            LCD.Clear();
         }
         
         switch(state){
@@ -1252,16 +1254,19 @@ void lineFollowToStop(int percent){
 
             //turn right
             case RIGHT:
-                right_motor.SetPercent(percent);
-                left_motor.SetPercent(percent-10);
+                
+                LCD.DrawRectangle(200,0,119,239);
+                left_motor.SetPercent(percent);
+                right_motor.SetPercent(10);
                 
 
                 break;
 
             //turn left
             case LEFT:
-                right_motor.SetPercent(percent-10);
-                left_motor.SetPercent(percent);
+                LCD.DrawRectangle(0,0,119,239);
+                left_motor.SetPercent(10);
+                right_motor.SetPercent(percent);
 
                 break;
 
