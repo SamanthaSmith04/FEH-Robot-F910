@@ -1,15 +1,15 @@
-/* =========================================================
+/* ==================================================================================
 *                       FEH Robot Project Group 910F
 *
 *Group Members: Searita Chen, Bennett Godinho-Nelson, Samantha Smith, John Ulm
 *
 *                             Robot Code
-===================================================*/
+==================================================================================*/
 
 /* =========================================================
 *                                PORTS
 *   MOTORS
-*       LEFT DRIVE         - MOTOR 0
+*       LEFT DRIVE         - MOTOR 3
 *       RIGHT DRIVE        - MOTOR 1
 *       ARM MOTOR          - MOTOR 2
 *   SERVOS
@@ -18,16 +18,17 @@
 *       LEFT ENCODER       - P0_0
 *       RIGHT ENCODER      - P0_1
 *   OTHER COMPONENTS
-*       CDS CELL (COLOR)   - P1_0
+*       CDS CELL           - P1_0
 *       OPTO SENSOR R      - P1_1
 *       OPTO SENSOR M      - P1_2
 *       OPTO SENSOR L      - P1_3
-*       BUMP SWITCH FRONT  -
-*       BUMP SWITCH BACK L -
-*       BUMP SWITCH BACK R -
+*       BUMP SWITCH FRONT  - P3_0
+*       BUMP SWITCH BACK L - P1_6
+*       BUMP SWITCH BACK R - P1_7
 ===================================================*/
 
 /*================================================== IMPORTS ==================================================*/
+
 #include <FEHLCD.h>
 #include <FEHMotor.h>
 #include <FEHServo.h>
@@ -45,9 +46,9 @@
 #define ARM_MOTOR_PORT FEHMotor::Motor2
 #define DROPPER_SERVO_PORT FEHServo::Servo0
 #define CDS_SENSOR_PORT FEHIO::P1_0 // CDS for COLOR
-#define CDS_R_PORT FEHIO::P1_1
-#define CDS_M_PORT FEHIO::P1_2
-#define CDS_L_PORT FEHIO::P1_3
+#define OPT_R_PORT FEHIO::P1_1
+#define OPT_M_PORT FEHIO::P1_2
+#define OPT_L_PORT FEHIO::P1_3
 #define BUMP_SWITCH_PORT FEHIO::P0_1
 #define RIGHT_ENCODER_PORT FEHIO::P0_1
 #define LEFT_ENCODER_PORT FEHIO::P0_0
@@ -77,6 +78,7 @@
 #define PAUSETIME 0.2
 
 /*================================================== VARIABLES ==================================================*/
+
 //ENCODERS
 DigitalEncoder right_encoder(RIGHT_ENCODER_PORT);
 DigitalEncoder left_encoder(LEFT_ENCODER_PORT);
@@ -101,6 +103,7 @@ int side = 0;
 double maxLight =3.3;
 
 /*================================================== FUNCTION HEADERS ==================================================*/
+
 //TESTING FUNCTIONS
 void testCDS();
 void driveTest();
@@ -114,20 +117,24 @@ void checkPoint4Code();
 void checkPoint5Code();
 
 //MOVEMENT
-void moveForward(int, double);
-void moveBackward(int, double);
-void moveBackward(int);
-void stopDriving();
-void rotateLeft(int, double);
-void rotateLeftRPS(int, double, int);
-void rotateRight(int, double);
-void startToRampTopR(int);
-void startToRampTopRWithRPS(int);
-void moveArm(int, double);
-void moveUntilBump(int, int, int);
-void moveUpdateMaxLight(int, double);
+    //Linear
+        void moveForward(int, double);
+        void moveBackward(int, double);
+        void moveBackward(int);
+        void moveUntilBump(int, int, int);
+        void moveUpdateMaxLight(int, double);
+    //Rotation
+        void rotateLeft(int, double);
+        void rotateLeftRPS(int, double, int);
+        void rotateRight(int, double);
+    //Lever Arm
+        void moveArm(int, double);
+    //Stopping
+        void stopDriving();
 
 //TASK FUNCTIONS
+void startToRampTopR(int);
+void startToRampTopRWithRPS(int);
 void passportStamp(int);
 void luggageDrop(int);
 void checkBoardingPass(int);
@@ -157,7 +164,7 @@ int main()
     fuelLevers(SLOW_SPEED); //starts at bottom of L ramp facing 0, ends at middle of bottom course section facing 90
     finalButton(PERCENT_SPEED); //starts at bottom course section facing 90, ends pressing final button
     
-    }
+}
 
 /*================================================== TASK FUNCTIONS ==================================================*/
 /*
@@ -196,7 +203,7 @@ void passportStamp(int motor_percent) {
     moveForward(motor_percent, moveToLever);
     Sleep(PAUSETIME);
 
-    moveArm(-arm_percent * 2, 0.3);
+    moveArm(-arm_percent * 2, 0.3); //arm is now back up
 }
 
 void luggageDrop(int motor_percent) {
@@ -277,51 +284,6 @@ void checkBoardingPass(int motor_percent) {
     Sleep(PAUSETIME);
     rotateRight(motor_percent, RPS.Heading() - 180);
     Sleep(PAUSETIME);
-}
-
-/*
-Drive forward using encoders and updates maxLight
-@param percent
-    the speed that the robot should move forward
-@param inches
-    the distance that the robot will move
-*/
-void moveUpdateMaxLight(int percent, double inches){
-    int counts = (int)((inches / CIRCUM) * 318);
-    int fullSpeedCounts = (counts * 0.90);
-    // Reset encoder counts
-    right_encoder.ResetCounts();
-    left_encoder.ResetCounts();
-
-    // Set both motors to desired percent
-    right_motor.SetPercent(percent);
-    left_motor.SetPercent(percent);
-
-    // While the average of the left and right encoder is less than 90% of the distance,
-    // keep running motors
-    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2){
-        if(cdsCell.Value()>maxLight){
-            maxLight=cdsCell.Value();
-        }
-        
-        
-    }
-
-    // drop speed to 75% of max speed
-    right_motor.SetPercent(percent * 0.8);
-    left_motor.SetPercent(percent * 0.8);
-
-    // While the average of the left and right encoder is less than the full distance,
-    // keep running motors
-    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2){
-        if(cdsCell.Value()>maxLight){
-            maxLight=cdsCell.Value();
-        }
-    }
-
-    // Turn off motors
-    stopDriving();
-
 }
 
 void pressBoardingPass(int motor_percent) {
@@ -1193,6 +1155,50 @@ void rotateLeft(int percent, double degrees)
     // Turn off motors
     right_motor.Stop();
     left_motor.Stop();
+}
+
+/*
+Drive forward using encoders and updates maxLight
+Used to get the lowest light value to determine boarding pass color
+@param percent
+    the speed that the robot should move forward
+@param inches
+    the distance that the robot will move
+*/
+void moveUpdateMaxLight(int percent, double inches){
+    int counts = (int)((inches / CIRCUM) * 318);
+    int fullSpeedCounts = (counts * 0.90);
+    // Reset encoder counts
+    right_encoder.ResetCounts();
+    left_encoder.ResetCounts();
+
+    // Set both motors to desired percent
+    right_motor.SetPercent(percent);
+    left_motor.SetPercent(percent);
+
+    // While the average of the left and right encoder is less than 90% of the distance,
+    // keep running motors
+    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < fullSpeedCounts * 2){
+        if(cdsCell.Value()>maxLight){
+            maxLight=cdsCell.Value();
+        }
+    }
+
+    // drop speed to 75% of max speed
+    right_motor.SetPercent(percent * 0.8);
+    left_motor.SetPercent(percent * 0.8);
+
+    // While the average of the left and right encoder is less than the full distance,
+    // keep running motors
+    while ((left_encoder.Counts() + right_encoder.Counts()) / 2. < counts * 2){
+        if(cdsCell.Value()>maxLight){
+            maxLight=cdsCell.Value();
+        }
+    }
+
+    // Turn off motors
+    stopDriving();
+
 }
 
 /*
