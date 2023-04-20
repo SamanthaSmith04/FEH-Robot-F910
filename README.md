@@ -9,6 +9,5 @@ Project Documentation: https://u.osu.edu/feh23group0910f/
   <img src="https://imgur.com/PYZPg5o.jpg" height="300" />
   <img src="https://imgur.com/UN88Ius.jpg" height="300" />
   <img src="https://imgur.com/ZPSSFtw.gif" height="300" />
-  [Imgur](https://imgur.com/ZPSSFtw.gif)
 
 </div>
