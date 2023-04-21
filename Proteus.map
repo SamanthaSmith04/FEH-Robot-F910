@@ -2365,51 +2365,51 @@ LOAD /Applications/FEH_ARM/bin/../lib/gcc/arm-none-eabi/10.3.1/thumb/v7e-m/nofp/
  .text._Z17checkBoardingPassi
                 0x000000000000c6f0      0x198 ../main.o
                 0x000000000000c6f0                checkBoardingPass(int)
- .text._Z18moveUpdateMaxLightid
-                0x000000000000c888      0x250 ../main.o
-                0x000000000000c888                moveUpdateMaxLight(int, double)
  .text._Z17pressBoardingPassi
-                0x000000000000cad8      0x188 ../main.o
-                0x000000000000cad8                pressBoardingPass(int)
+                0x000000000000c888      0x188 ../main.o
+                0x000000000000c888                pressBoardingPass(int)
  .text._Z11goDownLRampi
-                0x000000000000cc60       0x78 ../main.o
-                0x000000000000cc60                goDownLRamp(int)
+                0x000000000000ca10       0x78 ../main.o
+                0x000000000000ca10                goDownLRamp(int)
  .text._Z10fuelLeversi
-                0x000000000000ccd8      0x178 ../main.o
-                0x000000000000ccd8                fuelLevers(int)
+                0x000000000000ca88      0x178 ../main.o
+                0x000000000000ca88                fuelLevers(int)
  .text._Z11finalButtoni
-                0x000000000000ce50       0xe0 ../main.o
-                0x000000000000ce50                finalButton(int)
+                0x000000000000cc00       0xe0 ../main.o
+                0x000000000000cc00                finalButton(int)
  .text._Z7moveArmid
-                0x000000000000cf30       0x38 ../main.o
-                0x000000000000cf30                moveArm(int, double)
+                0x000000000000cce0       0x38 ../main.o
+                0x000000000000cce0                moveArm(int, double)
  .text._Z22startToRampTopRWithRPSi
-                0x000000000000cf68       0xe0 ../main.o
-                0x000000000000cf68                startToRampTopRWithRPS(int)
+                0x000000000000cd18       0xe0 ../main.o
+                0x000000000000cd18                startToRampTopRWithRPS(int)
  .text._Z11moveForwardid
-                0x000000000000d048      0x1c0 ../main.o
-                0x000000000000d048                moveForward(int, double)
+                0x000000000000cdf8      0x1c0 ../main.o
+                0x000000000000cdf8                moveForward(int, double)
  .text._Z11moveForwardi
-                0x000000000000d208       0x38 ../main.o
-                0x000000000000d208                moveForward(int)
+                0x000000000000cfb8       0x38 ../main.o
+                0x000000000000cfb8                moveForward(int)
  .text._Z12moveBackwardid
-                0x000000000000d240      0x1d0 ../main.o
-                0x000000000000d240                moveBackward(int, double)
+                0x000000000000cff0      0x1d0 ../main.o
+                0x000000000000cff0                moveBackward(int, double)
  .text._Z12moveBackwardi
-                0x000000000000d410       0x40 ../main.o
-                0x000000000000d410                moveBackward(int)
+                0x000000000000d1c0       0x40 ../main.o
+                0x000000000000d1c0                moveBackward(int)
  .text._Z11stopDrivingv
-                0x000000000000d450       0x1c ../main.o
-                0x000000000000d450                stopDriving()
- *fill*         0x000000000000d46c        0x4 
+                0x000000000000d200       0x1c ../main.o
+                0x000000000000d200                stopDriving()
+ *fill*         0x000000000000d21c        0x4 
  .text._Z13moveUntilBumpiii
-                0x000000000000d470      0x2c4 ../main.o
-                0x000000000000d470                moveUntilBump(int, int, int)
- *fill*         0x000000000000d734        0x4 
+                0x000000000000d220      0x2c4 ../main.o
+                0x000000000000d220                moveUntilBump(int, int, int)
+ *fill*         0x000000000000d4e4        0x4 
  .text._Z10rotateLeftid
-                0x000000000000d738      0x194 ../main.o
-                0x000000000000d738                rotateLeft(int, double)
- *fill*         0x000000000000d8cc        0x4 
+                0x000000000000d4e8      0x194 ../main.o
+                0x000000000000d4e8                rotateLeft(int, double)
+ *fill*         0x000000000000d67c        0x4 
+ .text._Z18moveUpdateMaxLightid
+                0x000000000000d680      0x250 ../main.o
+                0x000000000000d680                moveUpdateMaxLight(int, double)
  .text._Z13rotateLeftRPSidi
                 0x000000000000d8d0      0x258 ../main.o
                 0x000000000000d8d0                rotateLeftRPS(int, double, int)
@@ -4359,30 +4359,30 @@ LOAD linker stubs
  .debug_macinfo
                 0x000000000085fde9    0x69789 Libraries/FEHRandom.o
 
-.debug_line     0x0000000000000000     0xac46
- .debug_line    0x0000000000000000      0xfb7 ../main.o
- .debug_line    0x0000000000000fb7      0xef5 Startup/startup_mk60d10.o
- .debug_line    0x0000000000001eac      0x291 Libraries/FEHMotor.o
- .debug_line    0x000000000000213d      0x2bc Drivers/i2c.o
- .debug_line    0x00000000000023f9      0x309 Drivers/spi.o
- .debug_line    0x0000000000002702      0x268 Drivers/uart.o
- .debug_line    0x000000000000296a     0x1d4f Drivers/ff.o
- .debug_line    0x00000000000046b9      0xd6b Drivers/SDHC.o
- .debug_line    0x0000000000005424      0x1cd Drivers/lptmr.o
- .debug_line    0x00000000000055f1      0x1dc FEHProteus.o
- .debug_line    0x00000000000057cd      0x283 Drivers/FEHPropeller.o
- .debug_line    0x0000000000005a50      0x2f2 Libraries/FEHUtility.o
- .debug_line    0x0000000000005d42      0xc66 Libraries/FEHIO.o
- .debug_line    0x00000000000069a8      0x2f6 Drivers/adc16.o
- .debug_line    0x0000000000006c9e      0x330 Libraries/FEHBuzzer.o
- .debug_line    0x0000000000006fce      0x688 Libraries/FEHServo.o
- .debug_line    0x0000000000007656     0x1766 Libraries/FEHLCD.o
- .debug_line    0x0000000000008dbc      0x2cd Libraries/FEHAccel.o
- .debug_line    0x0000000000009089      0x225 Libraries/FEHBattery.o
- .debug_line    0x00000000000092ae      0x3fa Drivers/FEHXBee.o
- .debug_line    0x00000000000096a8      0x9b9 Libraries/FEHRPS.o
- .debug_line    0x000000000000a061      0x7b4 Libraries/FEHSD.o
- .debug_line    0x000000000000a815      0x431 Libraries/FEHRandom.o
+.debug_line     0x0000000000000000     0xac44
+ .debug_line    0x0000000000000000      0xfb5 ../main.o
+ .debug_line    0x0000000000000fb5      0xef5 Startup/startup_mk60d10.o
+ .debug_line    0x0000000000001eaa      0x291 Libraries/FEHMotor.o
+ .debug_line    0x000000000000213b      0x2bc Drivers/i2c.o
+ .debug_line    0x00000000000023f7      0x309 Drivers/spi.o
+ .debug_line    0x0000000000002700      0x268 Drivers/uart.o
+ .debug_line    0x0000000000002968     0x1d4f Drivers/ff.o
+ .debug_line    0x00000000000046b7      0xd6b Drivers/SDHC.o
+ .debug_line    0x0000000000005422      0x1cd Drivers/lptmr.o
+ .debug_line    0x00000000000055ef      0x1dc FEHProteus.o
+ .debug_line    0x00000000000057cb      0x283 Drivers/FEHPropeller.o
+ .debug_line    0x0000000000005a4e      0x2f2 Libraries/FEHUtility.o
+ .debug_line    0x0000000000005d40      0xc66 Libraries/FEHIO.o
+ .debug_line    0x00000000000069a6      0x2f6 Drivers/adc16.o
+ .debug_line    0x0000000000006c9c      0x330 Libraries/FEHBuzzer.o
+ .debug_line    0x0000000000006fcc      0x688 Libraries/FEHServo.o
+ .debug_line    0x0000000000007654     0x1766 Libraries/FEHLCD.o
+ .debug_line    0x0000000000008dba      0x2cd Libraries/FEHAccel.o
+ .debug_line    0x0000000000009087      0x225 Libraries/FEHBattery.o
+ .debug_line    0x00000000000092ac      0x3fa Drivers/FEHXBee.o
+ .debug_line    0x00000000000096a6      0x9b9 Libraries/FEHRPS.o
+ .debug_line    0x000000000000a05f      0x7b4 Libraries/FEHSD.o
+ .debug_line    0x000000000000a813      0x431 Libraries/FEHRandom.o
 
 .debug_str      0x0000000000000000     0x5a93
  .debug_str     0x0000000000000000     0x1e19 ../main.o

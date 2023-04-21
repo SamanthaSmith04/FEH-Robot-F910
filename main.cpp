@@ -152,6 +152,7 @@ int main()
     dropperServo.SetMax(SERVO_MAX);
 
     dropperServo.SetDegree(SERVO_CLOSED);
+
     RPS.InitializeTouchMenu();
 
     Sleep(0.3);
@@ -240,7 +241,7 @@ void luggageDrop(int motor_percent) {
 
 void checkBoardingPass(int motor_percent) {
     int dropperToAlmostLight = 14;
-    int wallToLight = 5;
+    int wallToLight = 4;
     moveForward(motor_percent, 5);
         Sleep(PAUSETIME);
 
@@ -277,7 +278,7 @@ void checkBoardingPass(int motor_percent) {
     else
     {
         LCD.SetBackgroundColor(YELLOW);
-        side = 1; // default to red
+        side = 0; // default to blue
     }
     LCD.Clear();
     LCD.Write(CDSValue);
@@ -337,7 +338,7 @@ void pressBoardingPass(int motor_percent) {
 void goDownLRamp(int motor_percent) {
     int moveAwayFromWall = 1;
     int turnToRamp = 90;
-    int driveDownRamp = 29;
+    int driveDownRamp = 27;
 
     moveForward(motor_percent, moveAwayFromWall);
     Sleep(PAUSETIME);
