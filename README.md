@@ -12,6 +12,7 @@ Project Documentation: https://u.osu.edu/feh23group0910f/
 
 </div>
 <br>
+<p>
 This project was for ENGR 1282.01H where the team was tasked with creating a fully autonomous robot to navigate through a course and perform various tasks. The project theme was an airport where the robot had to complete different themed tasks like stamping passports, checking boarding passes, delivering luggage, and fueling the plane. Each task posed a different challenge for the team and the robot was designed so that its components could be used for multiple tasks. Each team was given a budget of $160, and our team only used $122.
 
 
@@ -23,3 +24,4 @@ Some of the things that our team implemented were:
 
 
 The robot included a lever arm for interacting with various switches and levers, extrusions for pressing buttons, and a dropper mechanism to release a suitcase. Our robot was capable of completing a perfect run in about a minute, which was half the time allotted to the teams to complete a run.
+</p>
